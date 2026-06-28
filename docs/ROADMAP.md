@@ -51,7 +51,7 @@ Ba nguyên tắc xuyên suốt:
 
 Mô hình: mỗi **module** là một vertical slice tự chứa (Domain + Application + Infrastructure + API endpoints), giao tiếp với nhau **chỉ qua message bus (Wolverine) hoặc public contracts** — không reference trực tiếp internal của nhau. Đây là điều khiến nó "modular" chứ không phải monolith rối.
 
-```
+```text
 EventHub/
 ├── .github/
 │   └── workflows/
@@ -149,7 +149,7 @@ Mục tiêu: solution Modular Monolith chạy được với **1 module hoàn ch
 | 2 | Docker Compose: postgres + redis + minio. EF Core 10 + first migration. Setup `AddModules()/UseModules()` pattern | `docker compose up` lên được hạ tầng |
 | 3 | Module Identity — Domain (User, Role, RefreshToken) + DbContext | Migration Identity chạy |
 | 4 | JWT authentication + refresh token + role-based authorization. Login/Register endpoints | Đăng nhập trả JWT thật |
-| 5 | Global exception handling middleware, Result<T> pattern, FluentValidation cho Register | Lỗi trả về chuẩn ProblemDetails |
+| 5 | Global exception handling middleware, `Result<T>` pattern, FluentValidation cho Register | Lỗi trả về chuẩn ProblemDetails |
 | 6–7 | Module Events — CRUD đầy đủ, pagination, validation. Vài unit test domain | Events API chạy + test xanh |
 
 **Mốc cuối tuần 1:** clone về, `docker compose up`, đăng nhập, CRUD event được.

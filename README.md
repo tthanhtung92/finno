@@ -62,7 +62,7 @@ Ranh giới này được **kiểm soát tự động** bằng architecture test
 <!-- TODO: chèn sơ đồ kiến trúc ở đây -->
 <!-- ![Architecture](docs/assets/architecture.png) -->
 
-```
+```text
 ┌─────────────────────────────────────────────┐
 │            EventHub.Api (Host)               │
 │           Composition Root                   │
@@ -142,7 +142,7 @@ dotnet run --project src/Bootstrap/EventHub.Api
 
 ## Cấu trúc dự án
 
-```
+```text
 EventHub/
 ├── src/
 │   ├── Bootstrap/EventHub.Api/      # Host duy nhất — composition root

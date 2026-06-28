@@ -12,7 +12,7 @@ Quy tắc bất di bất dịch:
 
 Vòng lặp mỗi ngày:
 
-```
+```text
 Đọc guide ngày → hiểu khái niệm → tự code → tự verify → nhờ mentor review → commit
 ```
 
@@ -34,22 +34,27 @@ Khi cần mentor review, hãy mô tả bạn đã làm gì (hoặc để mentor 
 Đọc lướt trước để có bức tranh tổng thể. Chi tiết sẽ nằm trong guide từng ngày.
 
 ### Day 2 — Hạ tầng + nền tảng module
+
 - **Mục tiêu:** `docker compose up` dựng được Postgres + Redis + MinIO; EF Core 10 tạo migration đầu tiên; định hình pattern `AddModules()` / `UseModules()` để host nạp module.
 - **Cần đọc trước:** Docker Compose cơ bản (service, volume, port, healthcheck); EF Core `DbContext` + `dotnet ef migrations`; ý tưởng "mỗi module tự đăng ký service/endpoint của mình qua một interface chung".
 
 ### Day 3 — Identity Domain
+
 - **Mục tiêu:** mô hình hóa `User`, `Role`, `RefreshToken`; dựng `DbContext` cho Identity; chạy được migration của module Identity.
 - **Cần đọc trước:** ASP.NET Core Identity (`IdentityUser`, `IdentityRole`) vs domain model thuần; quan hệ 1-n giữa User và RefreshToken; vì sao tách DbContext theo module.
 
 ### Day 4 — JWT + Refresh token + Authorization
+
 - **Mục tiêu:** Login/Register trả JWT thật; cơ chế refresh token; phân quyền theo role.
 - **Cần đọc trước:** cấu trúc JWT (header/payload/signature), claim, `JwtBearer` authentication; vòng đời access token ngắn + refresh token dài; rotation & thu hồi refresh token.
 
 ### Day 5 — Xử lý lỗi & Validation chuẩn
+
 - **Mục tiêu:** middleware bắt exception toàn cục trả `ProblemDetails`; mẫu `Result<T>` để biểu diễn thành công/thất bại không dùng exception cho luồng nghiệp vụ; FluentValidation cho Register.
 - **Cần đọc trước:** RFC 7807 ProblemDetails; khác biệt giữa lỗi nghiệp vụ (dùng `Result<T>`) và lỗi ngoại lệ thật; pipeline validation.
 
 ### Day 6–7 — Module Events (CRUD)
+
 - **Mục tiêu:** CRUD `Event`/`Venue` đầy đủ, pagination, validation; vài unit test domain (xUnit + Shouldly).
 - **Cần đọc trước:** thiết kế aggregate `Event`; pagination kiểu keyset vs offset; viết unit test cho logic domain thuần (không chạm DB).
 

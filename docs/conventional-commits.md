@@ -2,7 +2,7 @@
 
 ## Cú pháp
 
-```
+```text
 <type>(<scope>): <description>
 
 [body tùy chọn]
@@ -32,7 +32,7 @@
 
 ## Ví dụ
 
-```
+```text
 feat(auth): thêm đăng nhập bằng Google
 fix: sửa lỗi crash khi giỏ hàng rỗng
 docs: cập nhật hướng dẫn cài đặt
@@ -43,7 +43,7 @@ refactor(api): tách logic xử lý đơn hàng
 
 Thêm `!` sau type/scope, hoặc dùng footer `BREAKING CHANGE:`.
 
-```
+```text
 feat(api)!: đổi định dạng response
 
 BREAKING CHANGE: trường `userId` đổi thành `user_id`

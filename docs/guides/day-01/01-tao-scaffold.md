@@ -84,6 +84,7 @@ dotnet build EventHub.slnx
 Phải `Build succeeded`. (Lúc này host vẫn còn endpoint mẫu `"Hello World!"`, các library còn `Class1.cs` — bình thường, dọn ở Bước 4.)
 
 > **Cạm bẫy thường gặp:**
+>
 > - **Quên `dotnet sln ... add`** → project có trên đĩa nhưng không nằm trong solution; IDE không hiện và `dotnet build EventHub.slnx` không build nó. Luôn chạy `dotnet sln list` để xác nhận.
 > - **Lỡ tạo `EventHub.Identity.Api` bằng `dotnet new web`** → có `Program.cs`/`appsettings`/`launchSettings` thừa. Nếu thấy, xóa project đó và tạo lại bằng `classlib` (rồi `dotnet sln add` lại).
 

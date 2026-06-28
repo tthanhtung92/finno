@@ -53,7 +53,7 @@ Day 1 gồm nhiều việc khác loại. Thay vì một commit khổng lồ, tá
 Với mỗi nhóm: chọn file (`git add <đường-dẫn cụ thể>`) rồi commit. Trước khi add, luôn xem `git status` để biết chính xác tên file cần add.
 
 > **Tránh dùng `git add src/**/*.csproj`:** ký tự `**` **không** được shell (bash/PowerShell) bung đệ quy theo mặc định, nên dễ sót project lồng sâu. Cách an toàn: add từng đường dẫn cụ thể bạn thấy trong `git status`, hoặc nếu muốn add tất cả những gì đã kiểm thì dùng `git add -A` (an toàn vì `.gitignore` đã chặn `bin/`/`obj/`).
-
+>
 > Nếu thấy việc tách phức tạp, **một commit gọn cũng chấp nhận được** ở Day 1 — đừng để việc này chặn bạn. Tách commit là kỹ năng "nice to have", build xanh + push được mới là bắt buộc.
 
 ## 6.5. Quy ước commit (Conventional Commits, tiếng Việt)

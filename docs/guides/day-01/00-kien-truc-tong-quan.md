@@ -30,7 +30,7 @@ Khi mở `EventHub.slnx` (sau khi tạo) ra xem, nó chỉ là vài thẻ `<Fold
 
 Mỗi module (vd Identity) gồm 4 project: `EventHub.Identity.Domain`, `.Application`, `.Infrastructure`, `.Api`. Đây là **Clean Architecture thu nhỏ**. Quy tắc vàng: **mũi tên phụ thuộc chỉ đi vào trong**.
 
-```
+```text
 Api  ──►  Application  ──►  Domain
               ▲
               │

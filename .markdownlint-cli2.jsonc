@@ -1,0 +1,27 @@
+// Cấu hình markdownlint-cli2 — linter/formatter mặc định cho file Markdown của repo.
+// Hook PostToolUse (.claude/hooks/format-md.sh) chạy `markdownlint-cli2 --fix` theo cấu hình này.
+// Tài liệu rule: https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+{
+  "config": {
+    "default": true,
+
+    // MD013 line-length: docs tiếng Việt viết prose, không hard-wrap theo cột -> tắt.
+    "MD013": false,
+
+    // MD024 no-duplicate-heading: các day-guide lặp tên section ("Mục tiêu", "Verify"...)
+    // ở những nhánh khác nhau -> chỉ cấm trùng heading khi là anh em cùng cấp.
+    "MD024": { "siblings_only": true },
+
+    // MD033 no-inline-html: cho phép vài thẻ HTML hữu ích trong docs (khối <details> gập được).
+    "MD033": { "allowed_elements": ["details", "summary", "br"] },
+
+    // MD060 table-column-style: padding dấu | trong bảng chỉ là thẩm mỹ, gây nhiễu -> tắt.
+    "MD060": false
+  },
+
+  // Phạm vi khi chạy thủ công `markdownlint-cli2` không kèm đường dẫn.
+  "globs": ["**/*.md"],
+
+  // Bỏ qua: dependency, file tooling nội bộ (.claude), thư mục build .NET.
+  "ignores": ["**/node_modules/**", ".claude/**", "**/bin/**", "**/obj/**"]
+}
