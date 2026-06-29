@@ -23,7 +23,7 @@ Khi cần mentor review, hãy mô tả bạn đã làm gì (hoặc để mentor 
 | Ngày | Chủ đề | Guide |
 |------|--------|-------|
 | 1 | Nền móng: solution, CPM, build props, Shared projects, dọn template | [day-01/](day-01/README.md) |
-| 2 | Docker Compose hạ tầng + EF Core first migration + pattern `AddModules/UseModules` | *(sẽ thêm)* |
+| 2 | Docker Compose hạ tầng + EF Core first migration + pattern `AddModules/UseModules` | [day-02/](day-02/README.md) |
 | 3 | Identity Domain (User, Role, RefreshToken) + DbContext | *(sẽ thêm)* |
 | 4 | JWT + refresh token + role-based authorization | *(sẽ thêm)* |
 | 5 | Global exception handling + `Result<T>` + FluentValidation | *(sẽ thêm)* |
