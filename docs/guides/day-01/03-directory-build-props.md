@@ -53,8 +53,8 @@ dotnet build EventHub.slnx
 
 ## 3.6. Xong bước này khi
 
-- [ ] `Directory.Build.props` ở gốc repo, chứa các thuộc tính build dùng chung.
-- [ ] Cả 7 `.csproj` đã bỏ thuộc tính trùng, gọn lại.
-- [ ] `dotnet build EventHub.slnx` xanh.
+- [x] `Directory.Build.props` ở gốc repo, chứa các thuộc tính build dùng chung.
+- [x] Cả 7 `.csproj` đã bỏ thuộc tính trùng, gọn lại.
+- [x] `dotnet build EventHub.slnx` xanh.
 
 → Sang [Bước 4 — Dọn template](04-don-template.md).

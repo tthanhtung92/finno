@@ -65,8 +65,8 @@ dotnet build EventHub.slnx
 
 ## 2.6. Xong bước này khi
 
-- [ ] File `Directory.Packages.props` tồn tại ở **gốc repo** (ngang `EventHub.slnx`).
-- [ ] Trong đó `ManagePackageVersionsCentrally` = `true`.
-- [ ] `dotnet build EventHub.slnx` vẫn xanh.
+- [x] File `Directory.Packages.props` tồn tại ở **gốc repo** (ngang `EventHub.slnx`).
+- [x] Trong đó `ManagePackageVersionsCentrally` = `true`.
+- [x] `dotnet build EventHub.slnx` vẫn xanh.
 
 → Sang [Bước 3 — Directory.Build.props](03-directory-build-props.md).

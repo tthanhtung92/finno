@@ -57,8 +57,8 @@ Mở trình duyệt (hoặc dùng `curl`) gọi vào địa chỉ host in ra tro
 
 ## 4.4. Xong bước này khi
 
-- [ ] Không còn `Class1.cs` nào trong toàn repo (đã xóa cả 6).
-- [ ] Host chỉ có một endpoint sức khỏe (không còn `"Hello World!"` mặc định, không có sample thừa).
-- [ ] `dotnet build` xanh, `dotnet run` chạy được.
+- [x] Không còn `Class1.cs` nào trong toàn repo (đã xóa cả 6).
+- [x] Host chỉ có một endpoint sức khỏe (không còn `"Hello World!"` mặc định, không có sample thừa).
+- [x] `dotnet build` xanh, `dotnet run` chạy được.
 
 → Sang [Bước 5 — LICENSE & README](05-license-readme.md).
