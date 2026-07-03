@@ -12,7 +12,16 @@ Khai version các package EF Core ở **một nơi** (`Directory.Packages.props`
 
 ## 2.2. Vì sao
 
-> TODO mentor: giải thích vì sao EF Core lại nằm ở **Infrastructure** chứ không phải Domain/Application (nhắc lại chiều phụ thuộc Clean Architecture ở [Day 1](../day-01/00-kien-truc-tong-quan.md): Domain không biết EF). Vì sao cần **provider riêng** (`Npgsql.EntityFrameworkCore.PostgreSQL`) ngoài package EF Core core. Phân biệt **`dotnet-ef` (công cụ CLI)** với **`Microsoft.EntityFrameworkCore.Design` (package design-time)** — vì sao thường cần cả hai để migration chạy.
+**Vì sao EF Core ở Infrastructure, không phải Domain/Application.** Nhắc lại chiều phụ thuộc Clean Architecture ([Day 1](../day-01/00-kien-truc-tong-quan.md)): Domain là lõi nghiệp vụ *không biết* mình được lưu bằng gì; Application điều phối use case; **Infrastructure** mới là nơi chứa chi tiết kỹ thuật "lưu xuống Postgres bằng EF Core". Đặt EF ở Infrastructure giữ Domain thuần POCO (test được không cần DB) và cho phép **đổi cơ chế lưu trữ mà không đụng Domain**. Nếu EF rò lên Domain, mọi entity dính ORM — mất tính khả chuyển và khó test.
+
+**Vì sao cần provider riêng (`Npgsql.EntityFrameworkCore.PostgreSQL`) ngoài EF Core core.** EF Core được thiết kế **pluggable**: phần *core* (`Microsoft.EntityFrameworkCore`) lo LINQ, change tracking, API chung — không biết SQL của DB cụ thể. Phần dịch sang phương ngữ SQL của từng DB nằm ở **provider**. Với Postgres là Npgsql; đổi sang SQL Server chỉ cần đổi provider, phần lớn code EF giữ nguyên. Đó là lý do bạn khai *cả* provider (nó tự kéo theo core như phụ thuộc).
+
+**Phân biệt `dotnet-ef` (công cụ CLI) và `Microsoft.EntityFrameworkCore.Design` (package design-time).** Hai thứ khác vai trò nhưng thường cần **cả hai** để migration chạy:
+
+- **`dotnet-ef`** là *chương trình dòng lệnh* bạn gõ (`dotnet ef migrations add`, `database update`). Cài như tool.
+- **`Microsoft.EntityFrameworkCore.Design`** là *thư viện* chứa logic mà `dotnet-ef` gọi vào lúc design-time để dựng model, so diff, sinh file migration. Thiếu nó, `dotnet-ef` không làm được việc (báo lỗi thiếu design-time services).
+
+Nói cách khác: `dotnet-ef` là "cái cần điều khiển", `Design` là "động cơ" nó điều khiển. Có cần mà thiếu động cơ thì vô dụng, và ngược lại.
 
 ## 2.3. Các bước làm
 
@@ -55,7 +64,7 @@ dotnet ef --version
 
 ## 2.6. Góc kể khi phỏng vấn
 
-> TODO mentor: điền — gợi ý "fix version qua CPM + tool manifest để build tái lập", "tách provider khỏi EF core thể hiện hiểu kiến trúc pluggable của EF".
+*"Tôi cố định version EF Core qua Central Package Management và version `dotnet-ef` qua tool manifest cục bộ — nên build tái lập được, máy khác chỉ cần `dotnet tool restore`, không lệch version giữa dev và CI. Và tôi khai provider Npgsql tách khỏi EF Core core một cách có ý thức: EF core lo LINQ/change tracking chung, provider lo dịch sang SQL Postgres — kiến trúc pluggable này cho phép đổi DB mà gần như không đụng code EF."*
 
 ## 2.7. Link tài liệu chính thức
 

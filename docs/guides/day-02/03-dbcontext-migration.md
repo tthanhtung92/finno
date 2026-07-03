@@ -12,7 +12,11 @@ Tạo một `DbContext` cho module Identity trong project Infrastructure, cấu 
 
 ## 3.2. Vì sao
 
-> TODO mentor: nhấn lại — migration giúp schema **version hóa cùng code**, áp lại được trên mọi môi trường, review qua PR. Giải thích vì sao mỗi module có **DbContext riêng** (ranh giới dữ liệu theo module — nối với quy tắc ranh giới ROADMAP mục 3). Giải thích **design-time DbContext factory**: vì sao `dotnet ef` (chạy lúc design-time, không có DI runtime của host) đôi khi cần một factory để khởi tạo DbContext.
+**Migration (nhắc lại).** Schema được version hóa cùng code, áp lại được trên mọi môi trường bằng `database update`, review qua diff PR (chi tiết đã bàn ở [00-tong-quan mục A3](00-tong-quan.md)).
+
+**Vì sao mỗi module một `DbContext` riêng.** EventHub là Modular Monolith: mỗi module (Identity, Events, Ticketing) sở hữu *dữ liệu của riêng nó* và không thò tay vào bảng của module khác (ranh giới [ROADMAP mục 3](../../ROADMAP.md)). `DbContext` riêng cho từng module biến ranh giới đó thành **ranh giới dữ liệu vật lý**: mỗi context chỉ khai `DbSet` của module mình, migration của mình nằm ở project Infrastructure của mình. Lợi ích: không có chuyện một module vô tình query bảng module khác qua chung một context; sau này muốn tách module ra service riêng (hoặc tách schema Postgres) cũng dễ vì dữ liệu đã phân định. Một `DbContext` khổng lồ ôm hết mọi bảng là phản-mẫu phá vỡ tính modular.
+
+**Vì sao cần design-time DbContext factory.** `dotnet ef` chạy **lúc design-time** — tức lúc bạn gõ lệnh ở terminal để sinh/áp migration, **không** phải lúc host chạy thật. Ở thời điểm đó **không có DI container của host** đã dựng sẵn để cấp `DbContextOptions` (connection string, provider). EF phải tự khởi tạo được `DbContext`. Nó thử vài cách; nếu không suy ra được, bạn cung cấp một `IDesignTimeDbContextFactory<TContext>`: một class mà trong đó *bạn* tự dựng `DbContextOptionsBuilder` (đọc connection string design-time, gọi `UseNpgsql`) và trả về context. Nhờ đó `dotnet ef` có đường tạo context mà không cần chạy toàn bộ host. (Cách thay thế: trỏ `--startup-project` vào host để EF mượn cấu hình DI của host — chọn một trong hai, đừng làm cả hai.)
 
 ## 3.3. Các bước làm — và ranh giới với Day 3
 
@@ -65,7 +69,7 @@ Phải thấy bảng **`__EFMigrationsHistory`** (và bảng placeholder nếu d
 
 ## 3.6. Góc kể khi phỏng vấn
 
-> TODO mentor: điền — gợi ý "DbContext per module = ranh giới dữ liệu theo module", "migration version hóa schema cùng code", "phân biệt connection string runtime vs design-time".
+*"Mỗi module có `DbContext` riêng — ranh giới dữ liệu vật lý khớp ranh giới module, không module nào query bảng module khác qua chung một context. Schema tôi version hóa bằng EF migration nằm trong git. Và tôi phân biệt rõ hai đường lấy connection string: runtime thì host cấp qua DI; design-time thì `dotnet ef` chạy ngoài host, không có DI, nên tôi cấp một `IDesignTimeDbContextFactory` để nó tự dựng được context — hai cơ chế cho hai thời điểm khác nhau."*
 
 ## 3.7. Link tài liệu chính thức
 

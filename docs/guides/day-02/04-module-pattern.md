@@ -12,7 +12,11 @@
 
 ## 4.2. Vì sao
 
-> TODO mentor: giải thích sâu — vì sao đảo từ "host biết mọi module" sang "module tự khai báo" (giảm coupling, mở rộng không sửa composition root — gần với Open/Closed). Nối với [Day 1](../day-01/00-kien-truc-tong-quan.md): module Api là **class library**; pattern này chính là cơ chế host "gọi vào" library đó. Nhắc lại ranh giới ROADMAP: cross-module chỉ qua Contracts/Wolverine — pattern module **không** phải kênh để module gọi nhau, chỉ là cách host nạp từng module.
+**Đảo từ "host biết mọi module" sang "module tự khai báo".** Với cách wire tay, `Program.cs` của host phải *biết tên* và gọi thẳng từng `AddIdentityServices()`, `MapIdentityEndpoints()`, `AddEventsServices()`... Mỗi lần thêm module = sửa composition root, coupling chặt, và `Program.cs` phình dần thành nơi biết mọi chi tiết. Pattern `IModule` đảo ngược trách nhiệm: mỗi module tự khai "tôi đăng ký service gì, map endpoint gì"; host chỉ gọi chung `AddModules()`/`UseModules()`. Điều này gần với **Open/Closed**: mở để mở rộng (thêm module), đóng để sửa (không phải mổ `Program.cs` mỗi lần) — với sắc thái ở mục 4.3 về "explicit vs reflection".
+
+**Nối với Day 1.** Module Api là **class library** (không phải host — xem [Day 1](../day-01/00-kien-truc-tong-quan.md)). Bản thân library không tự chạy; `IModule` chính là **hợp đồng để host "gọi vào" library đó** — host phát hiện các `IModule` rồi kích hoạt phần đăng ký/map của chúng. Pattern này là chất keo giữa "composition root duy nhất" và "các module là library".
+
+**`IModule` KHÔNG phải kênh giao tiếp cross-module.** Nhắc lại ranh giới cứng [ROADMAP mục 3](../../ROADMAP.md): module giao tiếp với nhau **chỉ** qua `EventHub.Contracts` (integration events) trên Wolverine. `IModule` chỉ để *host nạp* module lúc khởi động — module **không** được dùng nó để gọi sang module khác. Nhầm hai vai trò này là phá vỡ tính modular ngay từ nền.
 
 ## 4.3. Các bước làm
 
@@ -28,7 +32,12 @@ Mô tả bằng lời (bạn tự gõ):
 3. **Viết `AddModules()` và `UseModules()` trong host.** Trong `src/Bootstrap/EventHub.Api`, hai extension method:
    - `AddModules()` — tìm tất cả `IModule`, gọi method đăng ký service của từng cái lên `IServiceCollection`.
    - `UseModules()` — gọi method map endpoint của từng `IModule` lên app.
-   > TODO mentor: chốt **cách host tìm `IModule`**: quét assembly bằng reflection (tiện, tự động) hay đăng ký tường minh một danh sách module (rõ ràng, dễ trace)? Ghi đánh đổi + lựa chọn. Nếu reflection, lưu ý phải đảm bảo assembly của module được **nạp** (referenced) thì mới quét thấy.
+   > **Quyết định đã chốt — danh sách tường minh (explicit), không reflection.** Hai cách host tìm `IModule`:
+   >
+   > - **Explicit registry (đang dùng):** host giữ một danh sách tường minh, vd `[new IdentityModule(), ...]`, rồi duyệt gọi. Thêm module = **thêm đúng một dòng** vào danh sách này.
+   > - **Reflection scan:** quét mọi assembly tìm type hiện thực `IModule` → thêm module = *0 dòng* sửa ở host (Open/Closed "thuần").
+   >
+   > **Đánh đổi + vì sao chọn explicit:** reflection tự động hơn nhưng (1) **khó trace** — nhìn `Program.cs` không biết module nào được nạp; và (2) dính bẫy **"assembly chưa nạp thì quét ra rỗng"**: nếu host không reference (trực tiếp/gián tiếp) assembly module, JIT chưa nạp nó → scan không thấy → module *âm thầm* không map endpoint (404 khó hiểu, không lỗi). Ta chọn **explicit** để đổi lấy tính traceable và tránh bẫy đó — chấp nhận thêm một dòng mỗi khi có module mới. (Chi tiết ở [notes.md — Ghi chú 2](notes.md).)
 
 4. **Gọi trong `Program.cs` của host.** Thay phần wire tay (nếu có) bằng `builder.Services.AddModules(...)` và `app.UseModules()`.
 
@@ -43,7 +52,13 @@ dotnet run --project src/Bootstrap/EventHub.Api
 - Host chạy; endpoint của module Identity (vd một endpoint thử do bạn map qua `IModule`) **gọi được** — chứng tỏ host đã nạp module qua `UseModules()`, không phải wire tay.
 - Tắt host bằng `Ctrl+C`.
 
-> TODO mentor: gợi ý một cách kiểm chứng cụ thể hơn — vd map một endpoint `GET /identity/ping` trong module rồi `curl` nó; xác nhận nó xuất hiện nhờ `UseModules()` chứ không khai trong `Program.cs`.
+**Kiểm chứng cụ thể — endpoint "ping" tự chứng minh việc nạp.** Trong `IModule` của Identity, map một route thử, vd `GET /identity/ping` trả về một chuỗi. **Không** khai route này ở `Program.cs`. Chạy host rồi gọi nó (chỉnh port theo `launchSettings` của host):
+
+```bash
+curl http://localhost:<port>/identity/ping
+```
+
+Nếu ping trả về đúng chuỗi mà bạn **chỉ** khai trong module (không đụng `Program.cs`) → chứng minh host đã map endpoint *qua* `UseModules()`. Muốn chắc hơn nữa: tạm bỏ module khỏi danh sách trong `AddModules`/`UseModules` → gọi lại phải ra **404**; thêm lại → 200. Đó là bằng chứng trực tiếp pattern hoạt động. (Xóa endpoint ping sau khi kiểm xong nếu không muốn giữ.)
 
 ## 4.5. Cạm bẫy thường gặp
 
@@ -54,7 +69,7 @@ dotnet run --project src/Bootstrap/EventHub.Api
 
 ## 4.6. Góc kể khi phỏng vấn
 
-> TODO mentor: điền — gợi ý "composition root mở-để-mở-rộng, đóng-để-sửa: thêm module không đụng Program.cs", "phân biệt nạp module vs giao tiếp cross-module".
+*"Composition root của tôi không wire tay từng module. Mỗi module hiện thực `IModule` tự đăng ký service và map endpoint; host gọi chung qua `AddModules`/`UseModules`. Tôi chọn danh sách module tường minh thay vì reflection — chấp nhận thêm một dòng khi có module mới để đổi lấy tính traceable và tránh bẫy 'assembly chưa nạp thì quét ra rỗng'. Và tôi tách bạch hai khái niệm: `IModule` chỉ để host **nạp** module lúc khởi động; còn module **giao tiếp** với nhau thì chỉ qua integration events trên Wolverine, không bao giờ gọi trực tiếp."*
 
 ## 4.7. Link tài liệu chính thức
 

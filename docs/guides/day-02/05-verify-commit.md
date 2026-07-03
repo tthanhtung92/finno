@@ -43,7 +43,9 @@ Nhắc quy ước [Conventional Commits tiếng Việt](../../conventional-commi
 - `feat(identity): thêm DbContext tối thiểu và migration đầu tiên`
 - `feat(bootstrap): thêm pattern IModule với AddModules/UseModules`
 
-> TODO mentor: chốt cách bổ commit cho gọn, đúng phạm vi (scope) từng commit; nhắc kiểm tra `.gitignore` đã loại trừ secret (`.env`, User Secrets) trước khi `git add`.
+**Nguyên tắc chia commit đúng scope:** mỗi commit là **một thay đổi logic hoàn chỉnh, tự build được**, với `type(scope)` phản ánh đúng vùng đụng tới — `chore(infra)` cho compose, `build` cho package/CPM, `feat(identity)` cho DbContext, `feat(bootstrap)` cho pattern module. Đừng gộp bốn việc rời vào một commit "day 2" (khó review, khó revert từng phần); cũng đừng băm quá vụn (mỗi dòng một commit). Mẹo: nếu message phải dùng chữ "và" nối hai việc không liên quan → nên tách.
+
+> **Bắt buộc trước khi `git add` — kiểm secret không lọt vào staged:** chạy `git status` và soi kỹ. `.env` (chứa mật khẩu Postgres/MinIO) và mọi file User Secrets **không được** vào git. Xác nhận `.gitignore` đã loại `.env`, `bin/`, `obj/`. User Secrets nằm ngoài cây repo (thư mục profile người dùng) nên an toàn sẵn, nhưng đừng vô tình chép connection string thật vào `appsettings.json` rồi add. Nếu lỡ stage secret, `git restore --staged <file>` gỡ ra trước khi commit.
 
 Các lệnh:
 
@@ -62,7 +64,7 @@ git push
 
 ## 5.5. Góc kể khi phỏng vấn
 
-> TODO mentor: điền — gợi ý "commit nhỏ theo scope kể được câu chuyện thay đổi", "migration nằm trong git nên ai cũng dựng lại được schema".
+*"Tôi chia commit theo scope — hạ tầng, package, DbContext, pattern module tách riêng — nên lịch sử git kể được câu chuyện thay đổi và revert được từng phần. File migration nằm trong git cùng code, nên bất kỳ ai clone về chỉ cần `database update` là dựng lại đúng schema; schema không phải thứ 'truyền miệng' hay chạy SQL tay. Và tôi kỷ luật về secret: `.env`/User Secrets không bao giờ vào repo, kiểm `git status` trước mỗi commit."*
 
 ## 5.6. Xong Day 2 khi
 

@@ -21,7 +21,13 @@ Một backend thật cần Postgres (database), Redis (cache), MinIO (lưu file)
 
 > **Góc kể phỏng vấn:** *"Tôi đóng gói toàn bộ hạ tầng dev (Postgres/Redis/MinIO) trong một docker-compose, kèm healthcheck và named volume, để môi trường tái lập được trên mọi máy và CI — không phụ thuộc 'máy tôi'."*
 
-> TODO mentor: bổ sung phần phân biệt **container vs image vs volume** ở mức một câu mỗi khái niệm (đủ cho junior chưa từng dùng Docker), và vì sao dev dùng Compose chứ không Kubernetes ở giai đoạn này.
+**Ba khái niệm Docker tối thiểu (mỗi cái một câu):**
+
+- **Image** — bản "khuôn" đóng băng: phần mềm + cấu hình để chạy (vd `postgres:17`). Chỉ đọc, tải về từ registry (Docker Hub).
+- **Container** — một *thể hiện đang chạy* của image (như object so với class). Xóa container không mất image; nhưng dữ liệu *bên trong* container mất theo nếu không gắn volume.
+- **Volume** — vùng lưu trữ **tách khỏi vòng đời container**, do Docker quản lý. Gắn volume vào thư mục dữ liệu của DB → xóa/tạo lại container, dữ liệu vẫn còn (xem [Bước 1](01-docker-compose.md)).
+
+**Vì sao Compose chứ không Kubernetes ở giai đoạn này:** Compose giải đúng bài toán *dev cục bộ một máy* — mô tả vài service + một lệnh `up`. Kubernetes giải bài toán *vận hành cụm nhiều máy ở production* (scaling, self-healing, rolling update): mạnh nhưng nặng cấu hình, thừa cho việc chạy hạ tầng dev. Dùng Compose bây giờ, bàn K8s ở phần DevOps (Tuần 4) nếu cần.
 
 ## A2. Ba service làm gì trong project này?
 
@@ -49,7 +55,12 @@ Tag image dùng trong [Bước 1](01-docker-compose.md): `postgres:17`, `redis:8
 
 > **Vì sao dùng migration thay vì tự gõ SQL `CREATE TABLE`?**
 >
-> TODO mentor: giải thích — schema được **version hóa cùng code** trong git; lên môi trường mới chỉ cần `database update`; review được diff schema qua PR. Nhấn mạnh đây là điểm "kể được khi phỏng vấn".
+> - **Version hóa schema cùng code:** mỗi migration là một file C# nằm trong git, đi cùng commit thay đổi model. Lịch sử schema = lịch sử code, không lạc nhau.
+> - **Tái lập trên mọi môi trường:** máy mới/CI/production chỉ cần `dotnet ef database update` là dựng đúng schema — không ai phải chạy tay một đống SQL theo trí nhớ.
+> - **Review được qua PR:** diff của file migration cho reviewer thấy chính xác schema đổi gì (thêm bảng/cột/index) trước khi merge.
+> - **Idempotent nhờ `__EFMigrationsHistory`:** EF biết migration nào đã áp nên không áp trùng, áp tiếp đúng cái còn thiếu.
+>
+> Đây là điểm kể được: *"Schema của tôi version hóa cùng code qua EF migration — ai clone về chỉ cần `database update`, và mọi thay đổi schema review được qua diff PR thay vì chạy SQL tay."*
 
 > **Ranh giới với Day 3:** Hôm nay DbContext **chỉ cần tối thiểu** để pipeline chạy thông — đừng model `User`/`Role`/`RefreshToken` ở đây, đó là việc Day 3.
 
