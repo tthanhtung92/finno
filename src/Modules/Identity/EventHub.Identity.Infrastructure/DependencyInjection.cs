@@ -1,3 +1,4 @@
+using EventHub.Identity.Infrastructure.Identity;
 using EventHub.Identity.Infrastructure.Persistence;
 
 using Microsoft.EntityFrameworkCore;
@@ -10,15 +11,16 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        // Add infrastructure services here, e.g., database context, repositories, etc.
         string? connectionString = configuration.GetConnectionString("IdentityDb");
-
         if (string.IsNullOrWhiteSpace(connectionString))
         {
             throw new InvalidOperationException("Connection string 'IdentityDb' is not configured.");
         }
+        services.AddDbContext<IdentityModuleDbContext>(options => options.UseNpgsql(connectionString));
 
-        services.AddDbContext<IdentityDbContext>(options => options.UseNpgsql(connectionString));
+        services.AddIdentityCore<ApplicationUser>()
+            .AddRoles<ApplicationRole>()
+            .AddEntityFrameworkStores<IdentityModuleDbContext>();
 
         return services;
     }

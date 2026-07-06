@@ -1,5 +1,9 @@
 <Solution>
-  <Folder Name="/src/" />
+  <Folder Name="/Solution Items/">
+    <File Path="dotnet-tools.json" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
   <Folder Name="/src/Bootstrap/">
     <Project Path="src/Bootstrap/EventHub.Api/EventHub.Api.csproj" />
   </Folder>

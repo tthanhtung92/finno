@@ -4,9 +4,9 @@ using Microsoft.Extensions.Configuration;
 
 namespace EventHub.Identity.Infrastructure.Persistence;
 
-public sealed class IdentityDbContextFactory : IDesignTimeDbContextFactory<IdentityDbContext>
+public sealed class IdentityModuleDbContextFactory : IDesignTimeDbContextFactory<IdentityModuleDbContext>
 {
-    public IdentityDbContext CreateDbContext(string[] args)
+    public IdentityModuleDbContext CreateDbContext(string[] args)
     {
         var configuration = new ConfigurationBuilder()
             .AddUserSecrets("2a471e71-84f6-4d13-bdd1-386bb5509270")
@@ -20,9 +20,9 @@ public sealed class IdentityDbContextFactory : IDesignTimeDbContextFactory<Ident
             throw new InvalidOperationException("Connection string 'IdentityDb' is not configured.");
         }
 
-        var optionsBuilder = new DbContextOptionsBuilder<IdentityDbContext>();
+        var optionsBuilder = new DbContextOptionsBuilder<IdentityModuleDbContext>();
         optionsBuilder.UseNpgsql(connectionString);
 
-        return new IdentityDbContext(optionsBuilder.Options);
+        return new IdentityModuleDbContext(optionsBuilder.Options);
     }
 }
