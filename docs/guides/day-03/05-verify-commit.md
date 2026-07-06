@@ -1,8 +1,8 @@
-# Bước 5 — Verify end-to-end & commit
+# Bước 5. Verify end-to-end & commit
 
 > Mục tiêu: rà lại toàn bộ Day 3 chạy thông (build + migration + bảng trong DB), rồi commit theo Conventional Commits tiếng Việt.
 >
-> Lưu ý: chỉ có lệnh CLI — cứ chạy theo.
+> Lưu ý: chỉ có lệnh CLI, cứ chạy theo.
 
 ---
 
@@ -20,7 +20,7 @@ docker compose --env-file .env -f docker/docker-compose.yml exec postgres psql -
 - `migrations list` liệt kê migration schema Identity (Hướng A: `InitialCreate` + `AddIdentitySchema`; Hướng B: một `InitialCreate`).
 - `\dt` thấy đủ **7 bảng `AspNet*`** + **`RefreshTokens`** + `__EFMigrationsHistory`.
 
-Tuỳ chọn — chạy thử host để chắc DI Identity không nổ lúc khởi động:
+Tuỳ chọn: chạy thử host để chắc DI Identity không nổ lúc khởi động:
 
 ```bash
 dotnet run --project src/Bootstrap/EventHub.Api
@@ -55,7 +55,7 @@ git commit
 feat(identity): mô hình hóa User/Role/RefreshToken + schema Identity
 ```
 
-Nếu bạn thích commit nhỏ, tách theo bước cho lịch sử dễ đọc (đây là **lựa chọn phong cách của bạn** — mentor khuyến nghị gộp một commit vì cả ngày là một đơn vị logic "dựng mô hình Identity"):
+Nếu bạn thích commit nhỏ, tách theo bước cho lịch sử dễ đọc (đây là **lựa chọn phong cách của bạn**, mentor khuyến nghị gộp một commit vì cả ngày là một đơn vị logic "dựng mô hình Identity"):
 
 ```text
 build(identity): thêm package Identity EF + căn version EF Core
@@ -72,8 +72,8 @@ git push
 
 ## 5.4. Cạm bẫy thường gặp
 
-- **Commit file migration nhưng quên snapshot:** `IdentityDbContextModelSnapshot.cs` phải commit cùng migration — thiếu nó, máy khác diff sai. `git add -A` rồi kiểm `git status` để chắc.
-- **Lỡ commit secret:** connection string vẫn ở User Secrets (Day 2) — kiểm tra `appsettings.json` không chứa mật khẩu thật trước khi push.
+- **Commit file migration nhưng quên snapshot:** `IdentityDbContextModelSnapshot.cs` phải commit cùng migration, thiếu nó máy khác diff sai. `git add -A` rồi kiểm `git status` để chắc.
+- **Lỡ commit secret:** connection string vẫn ở User Secrets (Day 2). Kiểm tra `appsettings.json` không chứa mật khẩu thật trước khi push.
 
 ## 5.5. Xong Day 3 khi
 

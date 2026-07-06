@@ -1,4 +1,4 @@
-# Bước 5 — Verify end-to-end, commit & push
+# Bước 5: Verify end-to-end, commit & push
 
 > Mục tiêu: chốt lại toàn bộ Day 2 chạy thông từ đầu đến cuối, rồi commit theo chuẩn dự án và push.
 
@@ -20,7 +20,7 @@ docker compose --env-file .env -f docker/docker-compose.yml ps
 # 2. Solution build sạch
 dotnet build EventHub.slnx
 
-# 3. Migration đã áp (bảng __EFMigrationsHistory tồn tại) — xem lại Bước 3
+# 3. Migration đã áp (bảng __EFMigrationsHistory tồn tại): xem lại Bước 3
 dotnet ef database update --project src/Modules/Identity/EventHub.Identity.Infrastructure --startup-project src/Bootstrap/EventHub.Api
 
 # 4. Host chạy và nạp module
@@ -43,9 +43,9 @@ Nhắc quy ước [Conventional Commits tiếng Việt](../../conventional-commi
 - `feat(identity): thêm DbContext tối thiểu và migration đầu tiên`
 - `feat(bootstrap): thêm pattern IModule với AddModules/UseModules`
 
-**Nguyên tắc chia commit đúng scope:** mỗi commit là **một thay đổi logic hoàn chỉnh, tự build được**, với `type(scope)` phản ánh đúng vùng đụng tới — `chore(infra)` cho compose, `build` cho package/CPM, `feat(identity)` cho DbContext, `feat(bootstrap)` cho pattern module. Đừng gộp bốn việc rời vào một commit "day 2" (khó review, khó revert từng phần); cũng đừng băm quá vụn (mỗi dòng một commit). Mẹo: nếu message phải dùng chữ "và" nối hai việc không liên quan → nên tách.
+**Nguyên tắc chia commit đúng scope:** mỗi commit là **một thay đổi logic hoàn chỉnh, tự build được**, với `type(scope)` phản ánh đúng vùng đụng tới: `chore(infra)` cho compose, `build` cho package/CPM, `feat(identity)` cho DbContext, `feat(bootstrap)` cho pattern module. Đừng gộp bốn việc rời vào một commit "day 2" (khó review, khó revert từng phần); cũng đừng băm quá vụn (mỗi dòng một commit). Mẹo: nếu message phải dùng chữ "và" nối hai việc không liên quan → nên tách.
 
-> **Bắt buộc trước khi `git add` — kiểm secret không lọt vào staged:** chạy `git status` và soi kỹ. `.env` (chứa mật khẩu Postgres/MinIO) và mọi file User Secrets **không được** vào git. Xác nhận `.gitignore` đã loại `.env`, `bin/`, `obj/`. User Secrets nằm ngoài cây repo (thư mục profile người dùng) nên an toàn sẵn, nhưng đừng vô tình chép connection string thật vào `appsettings.json` rồi add. Nếu lỡ stage secret, `git restore --staged <file>` gỡ ra trước khi commit.
+> **Bắt buộc trước khi `git add`, kiểm secret không lọt vào staged:** chạy `git status` và soi kỹ. `.env` (chứa mật khẩu Postgres/MinIO) và mọi file User Secrets **không được** vào git. Xác nhận `.gitignore` đã loại `.env`, `bin/`, `obj/`. User Secrets nằm ngoài cây repo (thư mục profile người dùng) nên an toàn sẵn, nhưng đừng vô tình chép connection string thật vào `appsettings.json` rồi add. Nếu lỡ stage secret, `git restore --staged <file>` gỡ ra trước khi commit.
 
 Các lệnh:
 
@@ -60,11 +60,11 @@ git push
 
 - **Lỡ commit secret:** kiểm `git status` kỹ, đảm bảo `.env` và file User Secrets không nằm trong staged. Nếu lỡ add, gỡ khỏi stage trước khi commit.
 - **Commit cả thư mục `bin/`, `obj/`:** xác nhận `.gitignore` đã loại trừ.
-- **Migration không commit:** file migration EF sinh ra **phải** được commit (nó là một phần schema version hóa) — đừng để sót.
+- **Migration không commit:** file migration EF sinh ra **phải** được commit (nó là một phần schema version hóa), đừng để sót.
 
 ## 5.5. Góc kể khi phỏng vấn
 
-*"Tôi chia commit theo scope — hạ tầng, package, DbContext, pattern module tách riêng — nên lịch sử git kể được câu chuyện thay đổi và revert được từng phần. File migration nằm trong git cùng code, nên bất kỳ ai clone về chỉ cần `database update` là dựng lại đúng schema; schema không phải thứ 'truyền miệng' hay chạy SQL tay. Và tôi kỷ luật về secret: `.env`/User Secrets không bao giờ vào repo, kiểm `git status` trước mỗi commit."*
+*"Tôi chia commit theo scope: hạ tầng, package, DbContext, pattern module tách riêng, nên lịch sử git kể được câu chuyện thay đổi và revert được từng phần. File migration nằm trong git cùng code, nên bất kỳ ai clone về chỉ cần `database update` là dựng lại đúng schema; schema không phải thứ 'truyền miệng' hay chạy SQL tay. Và tôi kỷ luật về secret: `.env`/User Secrets không bao giờ vào repo, kiểm `git status` trước mỗi commit."*
 
 ## 5.6. Xong Day 2 khi
 

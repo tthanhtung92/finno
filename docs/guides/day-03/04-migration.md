@@ -1,8 +1,8 @@
-# Bước 4 — Sinh migration schema Identity thật + áp vào DB
+# Bước 4. Sinh migration schema Identity thật + áp vào DB
 
 > Mục tiêu: từ mô hình mới (7 entity Identity + `RefreshToken`), sinh migration tạo **8 bảng** rồi áp vào Postgres. Đây là lúc "nhìn thấy" schema auth thật trong DB.
 >
-> Lưu ý: chỉ có lệnh CLI ở đây — cứ chạy theo.
+> Lưu ý: chỉ có lệnh CLI ở đây, cứ chạy theo.
 
 ---
 
@@ -14,18 +14,18 @@ Chạy `dotnet ef migrations` để EF so sánh mô hình mới với snapshot c
 
 Migration = **version hóa schema cùng code** (đã học Day 2): mỗi thay đổi mô hình được dịch thành một file migration có `Up`/`Down`, review qua PR, áp lại được trên mọi môi trường.
 
-Điểm mới hôm nay: migration này **không rỗng** — nó chứa `CreateTable` thật cho 8 bảng. EF tính ra nội dung migration bằng cách **diff** mô hình hiện tại với **snapshot** (`IdentityDbContextModelSnapshot.cs`) — file mô tả "trạng thái mô hình lần migration gần nhất". Day 2 snapshot rỗng (DbContext trơn); giờ mô hình có 8 entity → diff ra 8 `CreateTable`.
+Điểm mới hôm nay: migration này **không rỗng**, nó chứa `CreateTable` thật cho 8 bảng. EF tính ra nội dung migration bằng cách **diff** mô hình hiện tại với **snapshot** (`IdentityDbContextModelSnapshot.cs`), file mô tả "trạng thái mô hình lần migration gần nhất". Day 2 snapshot rỗng (DbContext trơn); giờ mô hình có 8 entity → diff ra 8 `CreateTable`.
 
-## 4.3. Xử lý migration rỗng của Day 2 — đi **Hướng B** (vì đã chọn khóa `Guid`)
+## 4.3. Xử lý migration rỗng của Day 2: đi **Hướng B** (vì đã chọn khóa `Guid`)
 
-Day 2 đã có migration **rỗng** `InitialCreate` và **đã áp** vào DB. Vì [Quyết định 1](00-tong-quan.md) chọn khóa **`Guid`**, mà **đổi kiểu khóa chính phải nằm ở migration ĐẦU TIÊN** (không alter được PK sạch sẽ sau khi bảng đã tạo — [tài liệu Microsoft](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/customize-identity-model?view=aspnetcore-10.0#change-the-primary-key-type)), ta **dựng lại** `InitialCreate` để nó chứa cả schema với PK `Guid` ngay từ đầu:
+Day 2 đã có migration **rỗng** `InitialCreate` và **đã áp** vào DB. Vì [Quyết định 1](00-tong-quan.md) chọn khóa **`Guid`**, mà **đổi kiểu khóa chính phải nằm ở migration ĐẦU TIÊN** (không alter được PK sạch sẽ sau khi bảng đã tạo, [tài liệu Microsoft](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/customize-identity-model?view=aspnetcore-10.0#change-the-primary-key-type)), ta **dựng lại** `InitialCreate` để nó chứa cả schema với PK `Guid` ngay từ đầu:
 
-1. Revert DB về trạng thái chưa có migration nào (`database update 0`) — gỡ mọi thứ migration rỗng đã áp.
+1. Revert DB về trạng thái chưa có migration nào (`database update 0`), gỡ mọi thứ migration rỗng đã áp.
 2. Gỡ file migration rỗng (`migrations remove`).
-3. Tạo lại `InitialCreate` — lần này mô hình đã có 8 entity nên migration chứa schema đầy đủ, PK kiểu `uuid`.
+3. Tạo lại `InitialCreate`, lần này mô hình đã có 8 entity nên migration chứa schema đầy đủ, PK kiểu `uuid`.
 4. Áp vào DB (`database update`).
 
-> **Hướng A (thêm migration additive) không dùng ở đây** vì nó giữ nguyên bảng PK cũ — không đổi được sang `Guid`. Chỉ chọn A nếu bạn giữ khóa `string` mặc định (ta đã chọn Guid nên bỏ qua).
+> **Hướng A (thêm migration additive) không dùng ở đây** vì nó giữ nguyên bảng PK cũ, không đổi được sang `Guid`. Chỉ chọn A nếu bạn giữ khóa `string` mặc định (ta đã chọn Guid nên bỏ qua).
 >
 > Vì DB hiện là **DB dev** (chưa có dữ liệu thật), revert + dựng lại hoàn toàn an toàn. Đừng làm cách này trên DB có dữ liệu cần giữ.
 
@@ -48,7 +48,7 @@ docker compose --env-file .env -f docker/docker-compose.yml exec postgres psql -
 
 Phải thấy **7 bảng `AspNet*`** (`AspNetUsers`, `AspNetRoles`, `AspNetUserClaims`, `AspNetUserLogins`, `AspNetUserTokens`, `AspNetRoleClaims`, `AspNetUserRoles`) **+ bảng `RefreshTokens`** (+ `__EFMigrationsHistory`).
 
-Xác nhận PK là `uuid` (chứng minh khóa `Guid` đã ăn) — xem kiểu cột `Id` của `AspNetUsers`:
+Xác nhận PK là `uuid` (chứng minh khóa `Guid` đã ăn). Xem kiểu cột `Id` của `AspNetUsers`:
 
 ```bash
 docker compose --env-file .env -f docker/docker-compose.yml exec postgres psql -U <user> -d <db> -c "\d \"AspNetUsers\""
@@ -65,11 +65,11 @@ Cột `Id` phải là kiểu **`uuid`** (không phải `text`/`character varying
 
 ## 4.6. Góc kể khi phỏng vấn
 
-*"Vì tôi chọn khóa `uuid`, tôi phải đưa quyết định đó vào migration đầu — không alter PK sạch sau khi bảng đã tạo. Trên DB dev tôi revert + dựng lại `InitialCreate` để có một migration duy nhất chứa cả schema Identity với PK `uuid`. Migration này diff mô hình với snapshot nên tạo đúng 8 bảng."*
+*"Vì tôi chọn khóa `uuid`, tôi phải đưa quyết định đó vào migration đầu, không alter PK sạch sau khi bảng đã tạo. Trên DB dev tôi revert + dựng lại `InitialCreate` để có một migration duy nhất chứa cả schema Identity với PK `uuid`. Migration này diff mô hình với snapshot nên tạo đúng 8 bảng."*
 
 ## 4.7. Link tài liệu chính thức
 
-- [EF Core Migrations — tổng quan](https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
+- [EF Core Migrations (tổng quan)](https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
 - [Identity and EF Core Migrations](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/customize-identity-model?view=aspnetcore-10.0#identity-and-ef-core-migrations)
 - [Change the primary key type](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/customize-identity-model?view=aspnetcore-10.0#change-the-primary-key-type)
 - [`dotnet ef migrations` reference](https://learn.microsoft.com/en-us/ef/core/cli/dotnet#dotnet-ef-migrations-add)
@@ -81,4 +81,4 @@ Cột `Id` phải là kiểu **`uuid`** (không phải `text`/`character varying
 - [ ] `psql \dt` thấy đủ 7 bảng `AspNet*` + `RefreshTokens`.
 - [ ] Cột `Id` của `AspNetUsers` là kiểu `uuid`.
 
-→ Sang [Bước 5 — Verify & commit](05-verify-commit.md).
+→ Sang [Bước 5. Verify & commit](05-verify-commit.md).

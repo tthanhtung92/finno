@@ -1,27 +1,27 @@
-# Day 3 — Module Identity: ApplicationUser/Role (Infra) + RefreshToken POCO (Domain) + DbContext
+# Day 3. Module Identity: ApplicationUser/Role (Infra) + RefreshToken POCO (Domain) + DbContext
 
-> **Mentor mode.** Tài liệu giải thích *vì sao* và *làm gì*, **không kèm code C#/cấu hình** — bạn tự gõ. Mọi lệnh CLI (`dotnet`, `docker`, `git`) thì cứ chạy theo. Mỗi file dưới đây là **một bước**, làm tuần tự từ trên xuống.
+> **Mentor mode.** Tài liệu giải thích *vì sao* và *làm gì*, **không kèm code C#/cấu hình**, bạn tự gõ. Mọi lệnh CLI (`dotnet`, `docker`, `git`) thì cứ chạy theo. Mỗi file dưới đây là **một bước**, làm tuần tự từ trên xuống.
 >
-> Viết cho người **mới**: nếu một câu khiến bạn phải đoán, đó là lỗi của tài liệu — nhắn mentor để bổ sung.
+> Viết cho người **mới**: nếu một câu khiến bạn phải đoán, đó là lỗi của tài liệu. Nhắn mentor để bổ sung.
 
 ---
 
 ## Mục tiêu Day 3
 
-Theo [ROADMAP](../../ROADMAP.md) (mục 5, Tuần 1 — Ngày 3): *Module Identity — `ApplicationUser`/`Role` (Infrastructure) + `RefreshToken` POCO (Domain) + DbContext → Migration Identity chạy.*
+Theo [ROADMAP](../../ROADMAP.md) (mục 5, Tuần 1, Ngày 3): *Module Identity: `ApplicationUser`/`Role` (Infrastructure) + `RefreshToken` POCO (Domain) + DbContext → Migration Identity chạy.*
 
 Kết thúc Day 3 bạn có: *module Identity đã **mô hình hóa** `User`, `Role`, `RefreshToken` thật (không còn DbContext rỗng như Day 2); `IdentityDbContext` sinh được **schema Identity đầy đủ** (7 bảng `AspNet*` + bảng `RefreshTokens`); migration mới áp được vào Postgres.*
 
-Quỹ thời gian: ~1–2h. Đây là ngày đầu tiên chạm **domain thật** — chậm mà chắc, vì mọi thứ auth (Day 4: JWT, refresh token) đứng trên mô hình dữ liệu bạn dựng hôm nay.
+Quỹ thời gian: ~1–2h. Đây là ngày đầu tiên chạm **domain thật**, nên đi chậm mà chắc: mọi thứ auth (Day 4: JWT, refresh token) đứng trên mô hình dữ liệu bạn dựng hôm nay.
 
-> **Lưu ý phạm vi (đọc kỹ để không làm thừa):** Day 3 **chỉ** dựng *mô hình dữ liệu* (entity + DbContext + migration). Login/Register, sinh JWT, refresh token rotation là [Day 4](../README.md). Hôm nay chưa viết endpoint, chưa cấu hình authentication — đừng làm sớm.
+> **Lưu ý phạm vi (đọc kỹ để không làm thừa):** Day 3 **chỉ** dựng *mô hình dữ liệu* (entity + DbContext + migration). Login/Register, sinh JWT, refresh token rotation là [Day 4](../README.md). Hôm nay chưa viết endpoint, chưa cấu hình authentication. Đừng làm sớm.
 
 ## Bạn cần có sẵn trước khi bắt đầu
 
-- **Đã hoàn thành [Day 2](../day-02/README.md)** — solution build sạch; `docker compose … up -d` dựng được Postgres; migration rỗng `InitialCreate` đã áp (bảng `__EFMigrationsHistory` tồn tại).
+- **Đã hoàn thành [Day 2](../day-02/README.md)**: solution build sạch; `docker compose … up -d` dựng được Postgres; migration rỗng `InitialCreate` đã áp (bảng `__EFMigrationsHistory` tồn tại).
 - **Hạ tầng đang chạy**: `docker compose --env-file .env -f docker/docker-compose.yml ps` thấy Postgres `healthy`.
-- **Công cụ `dotnet-ef`** đã cài (từ Day 2) — kiểm tra `dotnet ef --version` ra số.
-- **Connection string `IdentityDb`** đã có trong User Secrets của host (từ Day 2 — đừng set lại).
+- **Công cụ `dotnet-ef`** đã cài (từ Day 2). Kiểm tra `dotnet ef --version` ra số.
+- **Connection string `IdentityDb`** đã có trong User Secrets của host (từ Day 2, đừng set lại).
 - Terminal mở tại **thư mục gốc repo** (nơi có `EventHub.slnx`).
 
 ## Các bước (làm theo thứ tự)

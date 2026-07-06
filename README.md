@@ -1,6 +1,6 @@
 # EventHub
 
-> Nền tảng đặt vé sự kiện xây dựng theo kiến trúc **Modular Monolith** trên **.NET 10**. Mỗi kỹ thuật backend cốt lõi — Authentication, Realtime, Caching, CDN, Messaging, Concurrency — được trình diễn ở mức _minimal nhưng đúng chuẩn production_.
+> Nền tảng đặt vé sự kiện xây dựng theo kiến trúc **Modular Monolith** trên **.NET 10**. Mỗi kỹ thuật backend cốt lõi (Authentication, Realtime, Caching, CDN, Messaging, Concurrency) được trình diễn ở mức _minimal nhưng đúng chuẩn production_.
 
 [![CI](https://github.com/tthanhtung9922/eventhub/actions/workflows/ci.yml/badge.svg)](https://github.com/tthanhtung9922/eventhub/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
@@ -32,9 +32,9 @@
 
 EventHub cho phép Organizer tạo sự kiện và bán vé, Attendee đặt vé theo thời gian thực. Project được thiết kế như một **bài trình diễn kỹ thuật**: thay vì nhiều tính năng, mỗi khái niệm backend quan trọng có một _vertical slice_ chạy thật, có test, và được giải thích lý do thiết kế.
 
-Điểm nhấn kỹ thuật là bài toán **chống overselling** — khi nhiều người mua vé cuối cùng cùng lúc — được giải bằng optimistic concurrency kết hợp transactional outbox.
+Điểm nhấn kỹ thuật là bài toán **chống overselling** (khi nhiều người mua vé cuối cùng cùng lúc), được giải bằng optimistic concurrency kết hợp transactional outbox.
 
-> **Trạng thái:** 🚧 Đang phát triển. Xem [Lộ trình](#lộ-trình).
+> **Trạng thái:** Đang phát triển. Xem [Lộ trình](#lộ-trình).
 
 <!-- TODO: chèn GIF demo realtime đếm vé ở đây sau khi hoàn thành Tuần 3 -->
 <!-- ![Demo](docs/assets/demo.gif) -->
@@ -49,8 +49,8 @@ EventHub cho phép Organizer tạo sự kiện và bán vé, Attendee đặt vé
 | **CRUD + Database**      | Events        | EF Core 10, pagination, validation                                |
 | **Caching**              | Events        | HybridCache (L1 in-memory + L2 Redis), cache-aside + invalidation |
 | **CDN / Object Storage** | Events        | Upload poster lên MinIO (S3-compatible)                           |
-| **Realtime**             | Ticketing     | SignalR — cập nhật số vé còn lại trực tiếp                        |
-| **Messaging / Queue**    | Ticketing     | Wolverine — đặt vé bất đồng bộ + transactional outbox             |
+| **Realtime**             | Ticketing     | SignalR: cập nhật số vé còn lại trực tiếp                         |
+| **Messaging / Queue**    | Ticketing     | Wolverine: đặt vé bất đồng bộ + transactional outbox              |
 | **Concurrency**          | Ticketing     | Optimistic concurrency (rowversion) chống overselling             |
 | **Observability**        | Toàn hệ thống | Serilog structured logging + OpenTelemetry tracing                |
 | **DevOps**               | Toàn hệ thống | Docker multi-stage, Compose, GitHub Actions CI                    |
@@ -59,7 +59,7 @@ EventHub cho phép Organizer tạo sự kiện và bán vé, Attendee đặt vé
 
 ## Kiến trúc
 
-EventHub là một **Modular Monolith**: một process duy nhất, nhưng mã nguồn chia thành các module độc lập (Identity, Events, Ticketing). Mỗi module tự chứa Domain, Application, Infrastructure và API endpoints; các module giao tiếp với nhau **chỉ qua integration events** (publish qua Wolverine) hoặc public contracts — không reference trực tiếp nội bộ của nhau.
+EventHub là một **Modular Monolith**: một process duy nhất, nhưng mã nguồn chia thành các module độc lập (Identity, Events, Ticketing). Mỗi module tự chứa Domain, Application, Infrastructure và API endpoints; các module giao tiếp với nhau **chỉ qua integration events** (publish qua Wolverine) hoặc public contracts, không reference trực tiếp nội bộ của nhau.
 
 Ranh giới này được **kiểm soát tự động** bằng architecture tests (NetArchTest): nếu một module vi phạm ranh giới, CI sẽ fail.
 
@@ -149,7 +149,7 @@ dotnet run --project src/Bootstrap/EventHub.Api
 ```text
 EventHub/
 ├── src/
-│   ├── Bootstrap/EventHub.Api/      # Host duy nhất — composition root
+│   ├── Bootstrap/EventHub.Api/      # Host duy nhất, composition root
 │   ├── Modules/
 │   │   ├── Identity/                # Auth, JWT, refresh token
 │   │   ├── Events/                  # CRUD sự kiện, cache, upload poster
@@ -176,9 +176,9 @@ dotnet test
 
 Project có ba tầng test:
 
-- **Unit tests** — logic domain và handler, dùng NSubstitute để mock.
-- **Integration tests** — chạy với PostgreSQL và Redis thật qua Testcontainers.
-- **Architecture tests** — NetArchTest ép ranh giới giữa các module; vi phạm sẽ fail CI.
+- **Unit tests**: logic domain và handler, dùng NSubstitute để mock.
+- **Integration tests**: chạy với PostgreSQL và Redis thật qua Testcontainers.
+- **Architecture tests**: NetArchTest ép ranh giới giữa các module; vi phạm sẽ fail CI.
 
 ---
 
@@ -186,9 +186,9 @@ Project có ba tầng test:
 
 Các quyết định lớn được ghi lại dưới dạng ADR (Architecture Decision Record):
 
-- [ADR-0001 — Vì sao chọn Modular Monolith](docs/adr/0001-why-modular-monolith.md)
-- [ADR-0002 — Vì sao chọn Wolverine](docs/adr/0002-why-wolverine.md)
-- [ADR-0003 — Chiến lược chống overselling](docs/adr/0003-overselling-strategy.md)
+- [ADR-0001: Vì sao chọn Modular Monolith](docs/adr/0001-why-modular-monolith.md)
+- [ADR-0002: Vì sao chọn Wolverine](docs/adr/0002-why-wolverine.md)
+- [ADR-0003: Chiến lược chống overselling](docs/adr/0003-overselling-strategy.md)
 
 ---
 
@@ -196,10 +196,10 @@ Các quyết định lớn được ghi lại dưới dạng ADR (Architecture D
 
 Lộ trình phát triển chi tiết 4 tuần xem trong [ROADMAP.md](ROADMAP.md).
 
-- [ ] **Tuần 1** — Nền móng: solution, Identity (auth), Events (CRUD)
-- [ ] **Tuần 2** — Caching & CDN: HybridCache, invalidation, MinIO
-- [ ] **Tuần 3** — Realtime & Messaging: SignalR, Wolverine outbox, chống overselling
-- [ ] **Tuần 4** — DevOps & hoàn thiện: Docker, CI/CD, observability, docs
+- [ ] **Tuần 1**: Nền móng, solution, Identity (auth), Events (CRUD)
+- [ ] **Tuần 2**: Caching & CDN, HybridCache, invalidation, MinIO
+- [ ] **Tuần 3**: Realtime & Messaging, SignalR, Wolverine outbox, chống overselling
+- [ ] **Tuần 4**: DevOps & hoàn thiện, Docker, CI/CD, observability, docs
 
 ---
 

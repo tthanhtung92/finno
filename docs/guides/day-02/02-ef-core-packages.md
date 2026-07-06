@@ -1,4 +1,4 @@
-# Bước 2 — EF Core 10 + Npgsql vào CPM, cài `dotnet-ef`
+# Bước 2: EF Core 10 + Npgsql vào CPM, cài `dotnet-ef`
 
 > Mục tiêu: đưa EF Core 10 và provider Postgres (Npgsql) vào solution **đúng kiểu CPM** (đã bật từ Day 1), và cài công cụ CLI `dotnet-ef` để tạo/áp migration.
 >
@@ -12,9 +12,9 @@ Khai version các package EF Core ở **một nơi** (`Directory.Packages.props`
 
 ## 2.2. Vì sao
 
-**Vì sao EF Core ở Infrastructure, không phải Domain/Application.** Nhắc lại chiều phụ thuộc Clean Architecture ([Day 1](../day-01/00-kien-truc-tong-quan.md)): Domain là lõi nghiệp vụ *không biết* mình được lưu bằng gì; Application điều phối use case; **Infrastructure** mới là nơi chứa chi tiết kỹ thuật "lưu xuống Postgres bằng EF Core". Đặt EF ở Infrastructure giữ Domain thuần POCO (test được không cần DB) và cho phép **đổi cơ chế lưu trữ mà không đụng Domain**. Nếu EF rò lên Domain, mọi entity dính ORM — mất tính khả chuyển và khó test.
+**Vì sao EF Core ở Infrastructure, không phải Domain/Application.** Nhắc lại chiều phụ thuộc Clean Architecture ([Day 1](../day-01/00-kien-truc-tong-quan.md)): Domain là lõi nghiệp vụ *không biết* mình được lưu bằng gì; Application điều phối use case; **Infrastructure** mới là nơi chứa chi tiết kỹ thuật "lưu xuống Postgres bằng EF Core". Đặt EF ở Infrastructure giữ Domain thuần POCO (test được không cần DB) và cho phép **đổi cơ chế lưu trữ mà không đụng Domain**. Nếu EF rò lên Domain, mọi entity dính ORM, mất tính khả chuyển và khó test.
 
-**Vì sao cần provider riêng (`Npgsql.EntityFrameworkCore.PostgreSQL`) ngoài EF Core core.** EF Core được thiết kế **pluggable**: phần *core* (`Microsoft.EntityFrameworkCore`) lo LINQ, change tracking, API chung — không biết SQL của DB cụ thể. Phần dịch sang phương ngữ SQL của từng DB nằm ở **provider**. Với Postgres là Npgsql; đổi sang SQL Server chỉ cần đổi provider, phần lớn code EF giữ nguyên. Đó là lý do bạn khai *cả* provider (nó tự kéo theo core như phụ thuộc).
+**Vì sao cần provider riêng (`Npgsql.EntityFrameworkCore.PostgreSQL`) ngoài EF Core core.** EF Core được thiết kế **pluggable**: phần *core* (`Microsoft.EntityFrameworkCore`) lo LINQ, change tracking, API chung, không biết SQL của DB cụ thể. Phần dịch sang phương ngữ SQL của từng DB nằm ở **provider**. Với Postgres là Npgsql; đổi sang SQL Server chỉ cần đổi provider, phần lớn code EF giữ nguyên. Đó là lý do bạn khai *cả* provider (nó tự kéo theo core như phụ thuộc).
 
 **Phân biệt `dotnet-ef` (công cụ CLI) và `Microsoft.EntityFrameworkCore.Design` (package design-time).** Hai thứ khác vai trò nhưng thường cần **cả hai** để migration chạy:
 
@@ -27,18 +27,18 @@ Nói cách khác: `dotnet-ef` là "cái cần điều khiển", `Design` là "đ
 
 Mô tả bằng lời:
 
-1. **Khai version trong CPM:** mở `Directory.Packages.props` ở gốc, thêm các phần tử `PackageVersion` cho hai package sau (đã đối chiếu NuGet, dòng .NET 10 — xem mục Link):
-   - **`Npgsql.EntityFrameworkCore.PostgreSQL`** — version **`10.0.2`**. Đây là provider Postgres; nó **đã kéo theo** `Microsoft.EntityFrameworkCore` và `Microsoft.EntityFrameworkCore.Relational` (yêu cầu `>= 10.0.4`) như phụ thuộc, nên bạn **không cần** tự khai gói EF Core core.
-   - **`Microsoft.EntityFrameworkCore.Design`** — version **`10.0.x`** (cùng dòng EF Core 10, vd `10.0.4` trở lên cho khớp). Gói design-time mà `dotnet ef` cần để tạo/áp migration.
-2. **Tham chiếu trong project Infrastructure:** mở `src/Modules/Identity/EventHub.Identity.Infrastructure/EventHub.Identity.Infrastructure.csproj`, thêm `PackageReference` tới hai package trên — **chỉ `Include`, KHÔNG `Version`** (CPM lo version). Gói `Microsoft.EntityFrameworkCore.Design` nên đặt **`PrivateAssets="all"`** (nó chỉ phục vụ thời điểm dev/migration, không nên chảy sang project khác tham chiếu Infrastructure).
-3. **Cài công cụ `dotnet-ef`:** cài như tool. Khuyến nghị tạo **tool manifest cục bộ** để version `dotnet-ef` cũng cố định theo repo (chạy `dotnet new tool-manifest` rồi cài vào manifest), thay vì cài global lệch máy — máy khác chỉ cần `dotnet tool restore`.
+1. **Khai version trong CPM:** mở `Directory.Packages.props` ở gốc, thêm các phần tử `PackageVersion` cho hai package sau (đã đối chiếu NuGet, dòng .NET 10: xem mục Link):
+   - **`Npgsql.EntityFrameworkCore.PostgreSQL`**: version **`10.0.2`**. Đây là provider Postgres; nó **đã kéo theo** `Microsoft.EntityFrameworkCore` và `Microsoft.EntityFrameworkCore.Relational` (yêu cầu `>= 10.0.4`) như phụ thuộc, nên bạn **không cần** tự khai gói EF Core core.
+   - **`Microsoft.EntityFrameworkCore.Design`**: version **`10.0.x`** (cùng dòng EF Core 10, vd `10.0.4` trở lên cho khớp). Gói design-time mà `dotnet ef` cần để tạo/áp migration.
+2. **Tham chiếu trong project Infrastructure:** mở `src/Modules/Identity/EventHub.Identity.Infrastructure/EventHub.Identity.Infrastructure.csproj`, thêm `PackageReference` tới hai package trên: **chỉ `Include`, KHÔNG `Version`** (CPM lo version). Gói `Microsoft.EntityFrameworkCore.Design` nên đặt **`PrivateAssets="all"`** (nó chỉ phục vụ thời điểm dev/migration, không nên chảy sang project khác tham chiếu Infrastructure).
+3. **Cài công cụ `dotnet-ef`:** cài như tool. Khuyến nghị tạo **tool manifest cục bộ** để version `dotnet-ef` cũng cố định theo repo (chạy `dotnet new tool-manifest` rồi cài vào manifest), thay vì cài global lệch máy, máy khác chỉ cần `dotnet tool restore`.
 
 > Lưu ý version: `10.0.2` là bản provider Npgsql mới nhất tại thời điểm viết; trước khi gõ hãy mở [trang NuGet của provider](https://www.nuget.org/packages/Npgsql.EntityFrameworkCore.PostgreSQL/) xác nhận bản ổn định mới nhất của dòng `10.x` và để `Microsoft.EntityFrameworkCore.Design` **cùng hoặc cao hơn** version EF Core mà provider yêu cầu (`>= 10.0.4`).
 
 Các lệnh CLI liên quan (chạy được, không phải code):
 
 ```bash
-dotnet new tool-manifest          # tạo manifest (1 lần) — mặc định ở .config/dotnet-tools.json; repo này để ở gốc (dotnet-tools.json), cả hai đều được dotnet tool restore nhận
+dotnet new tool-manifest          # tạo manifest (1 lần): mặc định ở .config/dotnet-tools.json; repo này để ở gốc (dotnet-tools.json), cả hai đều được dotnet tool restore nhận
 dotnet tool install dotnet-ef     # cài vào manifest cục bộ
 dotnet tool restore               # máy khác clone về thì restore tool
 dotnet ef --version               # xác nhận chạy được
@@ -52,7 +52,7 @@ dotnet build EventHub.slnx
 dotnet ef --version
 ```
 
-- Restore không báo `NU1008` (lỗi này nghĩa là lỡ để `Version` trong `PackageReference` khi CPM đang bật — sửa lại cho đúng luật).
+- Restore không báo `NU1008` (lỗi này nghĩa là lỡ để `Version` trong `PackageReference` khi CPM đang bật, sửa lại cho đúng luật).
 - Build xanh; `dotnet ef --version` ra số.
 
 ## 2.5. Cạm bẫy thường gặp
@@ -64,14 +64,14 @@ dotnet ef --version
 
 ## 2.6. Góc kể khi phỏng vấn
 
-*"Tôi cố định version EF Core qua Central Package Management và version `dotnet-ef` qua tool manifest cục bộ — nên build tái lập được, máy khác chỉ cần `dotnet tool restore`, không lệch version giữa dev và CI. Và tôi khai provider Npgsql tách khỏi EF Core core một cách có ý thức: EF core lo LINQ/change tracking chung, provider lo dịch sang SQL Postgres — kiến trúc pluggable này cho phép đổi DB mà gần như không đụng code EF."*
+*"Tôi cố định version EF Core qua Central Package Management và version `dotnet-ef` qua tool manifest cục bộ, nên build tái lập được, máy khác chỉ cần `dotnet tool restore`, không lệch version giữa dev và CI. Và tôi tách provider Npgsql khỏi EF Core core có chủ đích: EF core lo LINQ/change tracking chung, provider lo dịch sang SQL Postgres, kiến trúc pluggable này cho phép đổi DB mà gần như không đụng code EF."*
 
 ## 2.7. Link tài liệu chính thức
 
 - [Npgsql.EntityFrameworkCore.PostgreSQL trên NuGet (10.0.2)](https://www.nuget.org/packages/Npgsql.EntityFrameworkCore.PostgreSQL/) · [Npgsql EF Core 10.0 release notes](https://www.npgsql.org/efcore/release-notes/10.0.html)
-- [EF Core — Npgsql provider (docs)](https://www.npgsql.org/efcore/)
+- [EF Core: Npgsql provider (docs)](https://www.npgsql.org/efcore/)
 - [Cài đặt EF Core tools (`dotnet-ef`)](https://learn.microsoft.com/en-us/ef/core/cli/dotnet)
-- [Tool manifest — local tools](https://learn.microsoft.com/en-us/dotnet/core/tools/local-tools-how-to-use)
+- [Tool manifest: local tools](https://learn.microsoft.com/en-us/dotnet/core/tools/local-tools-how-to-use)
 - [Central Package Management](https://learn.microsoft.com/en-us/nuget/consume-packages/central-package-management)
 
 ## 2.8. Xong bước này khi
@@ -81,4 +81,4 @@ dotnet ef --version
 - [x] `dotnet ef --version` chạy được.
 - [x] `dotnet build EventHub.slnx` vẫn xanh.
 
-→ Sang [Bước 3 — DbContext + migration đầu tiên](03-dbcontext-migration.md).
+→ Sang [Bước 3: DbContext + migration đầu tiên](03-dbcontext-migration.md).

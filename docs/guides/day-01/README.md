@@ -1,18 +1,18 @@
-# Day 1 — Nền móng Solution (dựng từ số 0)
+# Day 1: Nền móng Solution (dựng từ số 0)
 
-> **Mentor mode.** Tài liệu giải thích *vì sao* và *làm gì*, **không kèm code C#/cấu hình** — bạn tự gõ. Mọi lệnh CLI (`dotnet`, `git`) thì cứ chạy theo. Mỗi file dưới đây là **một bước**, làm tuần tự từ trên xuống.
+> **Mentor mode.** Tài liệu giải thích *vì sao* và *làm gì*, **không kèm code C#/cấu hình**, bạn tự gõ. Mọi lệnh CLI (`dotnet`, `git`) thì cứ chạy theo. Mỗi file dưới đây là **một bước**, làm tuần tự từ trên xuống.
 >
-> Viết cho người **mới**: nếu một câu khiến bạn phải đoán, đó là lỗi của tài liệu — nhắn mentor để bổ sung.
+> Viết cho người **mới**: nếu một câu khiến bạn phải đoán, đó là lỗi của tài liệu, nhắn mentor để bổ sung.
 
 ---
 
 ## Mục tiêu Day 1
 
-Theo [ROADMAP](../../ROADMAP.md) (mục 5, Tuần 1 — Ngày 1): *Khởi tạo `EventHub.slnx`, cấu trúc thư mục, Central Package Management, `Directory.Build.props`, LICENSE (MIT), README khung → repo public push lên GitHub.*
+Theo [ROADMAP](../../ROADMAP.md) (mục 5, Tuần 1, Ngày 1): *Khởi tạo `EventHub.slnx`, cấu trúc thư mục, Central Package Management, `Directory.Build.props`, LICENSE (MIT), README khung → repo public push lên GitHub.*
 
 Kết thúc Day 1 bạn có: *solution Modular Monolith **dựng từ số 0**, build sạch, có Central Package Management + build settings dùng chung, đã dọn rác template, LICENSE/README ổn, và đã push lên GitHub.*
 
-Quỹ thời gian: ~1–2h. Nhẹ về tay, nhưng đây là lúc đặt "luật chơi" cho toàn project — làm chắc.
+Quỹ thời gian: ~1–2h. Nhẹ về tay, nhưng đây là lúc đặt "luật chơi" cho toàn project, làm chắc.
 
 ## Bạn cần có sẵn trước khi bắt đầu
 
@@ -21,7 +21,7 @@ Quỹ thời gian: ~1–2h. Nhẹ về tay, nhưng đây là lúc đặt "luật
 - Một editor: Visual Studio 2022 (17.13+), Rider, hoặc VS Code + C# Dev Kit.
 - Terminal mở tại **thư mục gốc repo** (thư mục bạn muốn chứa `EventHub.slnx`).
 
-> **Lưu ý quan trọng về phạm vi:** Day 1 chỉ dựng **module Identity** (cùng 2 project Shared và host). Hai module Events/Ticketing được tạo ở các ngày sau khi thực sự cần — đừng tạo sớm.
+> **Lưu ý quan trọng về phạm vi:** Day 1 chỉ dựng **module Identity** (cùng 2 project Shared và host). Hai module Events/Ticketing được tạo ở các ngày sau khi thực sự cần, đừng tạo sớm.
 
 ## Các bước (làm theo thứ tự)
 
@@ -34,7 +34,7 @@ Quỹ thời gian: ~1–2h. Nhẹ về tay, nhưng đây là lúc đặt "luật
 | 4 | [04-don-template.md](04-don-template.md) | Dọn rác template (`Class1.cs`, chỉnh endpoint mẫu của host) |
 | 5 | [05-license-readme.md](05-license-readme.md) | LICENSE (MIT) + README khung |
 | 6 | [06-commit-push.md](06-commit-push.md) | Build sạch → commit → push GitHub |
-| 📝 | [notes.md](notes.md) | **Ghi chú & đính chính sau review** — cơ chế nạp `Directory.Build.props`/CPM, vì sao module Api là library |
+| - | [notes.md](notes.md) | **Ghi chú & đính chính sau review**: cơ chế nạp `Directory.Build.props`/CPM, vì sao module Api là library |
 
 ## Quy tắc kiểm chứng xuyên suốt
 
@@ -50,7 +50,7 @@ Phải thấy `Build succeeded`. Nền móng không build được thì mọi ng
 
 - [ ] `dotnet build EventHub.slnx` xanh, không warning.
 - [ ] Chỉ có **một** host: `dotnet run --project src/Bootstrap/EventHub.Api` lên được, có endpoint sức khỏe (không còn `"Hello World!"` mặc định).
-- [ ] **Module Api là class library** (`EventHub.Identity.Api`), **không** có `Program.cs`/`appsettings`/`launchSettings` riêng — chỉ host Bootstrap mới là web host.
+- [ ] **Module Api là class library** (`EventHub.Identity.Api`), **không** có `Program.cs`/`appsettings`/`launchSettings` riêng. Chỉ host Bootstrap mới là web host.
 - [ ] `Directory.Packages.props` + `Directory.Build.props` tồn tại ở gốc; các `.csproj` đã gọn (không lặp version/build settings).
 - [ ] `EventHub.SharedKernel` + `EventHub.Contracts` xuất hiện trong solution, build cùng.
 - [ ] Không còn `Class1.cs` nào.

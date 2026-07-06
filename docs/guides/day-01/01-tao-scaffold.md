@@ -1,8 +1,8 @@
-# Bước 1 — Tạo scaffold (solution + project) từ số 0
+# Bước 1: Tạo scaffold (solution + project) từ số 0
 
-> Mục tiêu: dựng bộ khung solution Modular Monolith — file `.slnx`, một host, 4 project cho module Identity, 2 project Shared — rồi đưa tất cả vào solution.
+> Mục tiêu: dựng bộ khung solution Modular Monolith gồm file `.slnx`, một host, 4 project cho module Identity, 2 project Shared, rồi đưa tất cả vào solution.
 >
-> Bước này **toàn lệnh CLI** — cứ chạy theo đúng thứ tự. Đây là lúc dễ sai _kiểu project_ nhất, nên đọc kỹ phần "vì sao classlib".
+> Bước này **toàn lệnh CLI**, cứ chạy theo đúng thứ tự. Đây là lúc dễ sai _kiểu project_ nhất, nên đọc kỹ phần "vì sao classlib".
 
 ---
 
@@ -14,10 +14,10 @@ Tại **thư mục gốc repo** (nơi bạn muốn chứa solution), chạy:
 dotnet new sln --name EventHub
 ```
 
-- `dotnet new sln` — tạo file solution. Từ .NET 10, nó sinh ra định dạng **`.slnx`** (XML, người đọc được) theo mặc định.
-- `--name EventHub` — đặt tên file là `EventHub.slnx`. Nếu bỏ cờ này, tên file sẽ lấy theo tên thư mục hiện tại (có thể không phải `EventHub`), nên ta khai rõ.
+- `dotnet new sln`: tạo file solution. Từ .NET 10, nó sinh ra định dạng **`.slnx`** (XML, người đọc được) theo mặc định.
+- `--name EventHub`: đặt tên file là `EventHub.slnx`. Nếu bỏ cờ này, tên file sẽ lấy theo tên thư mục hiện tại (có thể không phải `EventHub`), nên ta khai rõ.
 
-Sau lệnh, ở gốc repo có `EventHub.slnx`. Mở ra xem: hiện nó gần như rỗng (`<Solution>` chưa có project nào) — đúng như mong đợi.
+Sau lệnh, ở gốc repo có `EventHub.slnx`. Mở ra xem: hiện nó gần như rỗng (`<Solution>` chưa có project nào), đúng như mong đợi.
 
 ## 1.2. Tạo host (project DUY NHẤT là web)
 
@@ -25,10 +25,10 @@ Sau lệnh, ở gốc repo có `EventHub.slnx`. Mở ra xem: hiện nó gần nh
 dotnet new web --output src/Bootstrap/EventHub.Api
 ```
 
-- `dotnet new web` — tạo một ứng dụng **ASP.NET Core Empty (Minimal API)**. Đây là **host / composition root** — project _duy nhất_ trong cả solution chạy độc lập (có `Program.cs`, `app.Run()`).
-- `--output <đường-dẫn>` — thư mục đích; tên project lấy theo tên thư mục cuối (`EventHub.Api`).
+- `dotnet new web`: tạo một ứng dụng **ASP.NET Core Empty (Minimal API)**. Đây là **host / composition root**, project _duy nhất_ trong cả solution chạy độc lập (có `Program.cs`, `app.Run()`).
+- `--output <đường-dẫn>`: thư mục đích; tên project lấy theo tên thư mục cuối (`EventHub.Api`).
 
-> **Vì sao `dotnet new web` chứ không phải `dotnet new webapi`?** Bản `web` (Empty) sinh `Program.cs` **tối giản** — chỉ một endpoint mẫu `/` trả `"Hello World!"`. Bản `webapi` lại kèm cả demo `weatherforecast` (mảng summaries + record) — rác không cần cho một composition root. Ta chọn bản tối giản; ở [Bước 4](04-don-template.md) chỉ cần chỉnh endpoint mẫu thành endpoint sức khỏe.
+> **Vì sao `dotnet new web` chứ không phải `dotnet new webapi`?** Bản `web` (Empty) sinh `Program.cs` **tối giản**, chỉ một endpoint mẫu `/` trả `"Hello World!"`. Bản `webapi` lại kèm cả demo `weatherforecast` (mảng summaries + record), rác không cần cho một composition root. Ta chọn bản tối giản; ở [Bước 4](04-don-template.md) chỉ cần chỉnh endpoint mẫu thành endpoint sức khỏe.
 
 ## 1.3. Tạo 4 project của module Identity (TẤT CẢ là classlib)
 
@@ -41,9 +41,9 @@ dotnet new classlib --output src/Modules/Identity/EventHub.Identity.Infrastructu
 dotnet new classlib --output src/Modules/Identity/EventHub.Identity.Api
 ```
 
-> **CỰC KỲ QUAN TRỌNG — đọc kỹ:** để ý project thứ tư, `EventHub.Identity.Api`, **cũng** dùng `dotnet new classlib`, **KHÔNG** dùng `dotnet new web`. Module Api chỉ là thư viện chứa định nghĩa endpoint, sẽ được host Bootstrap nạp vào ở [Day 2](../README.md). Nếu lỡ tạo nó bằng `dotnet new web`, bạn sẽ có **hai host** với hai `Program.cs` — phá vỡ "một process duy nhất" của Modular Monolith, và phải xóa làm lại. (Lý do đầy đủ ở [Bước A, mục A3](00-kien-truc-tong-quan.md).)
+> **CỰC KỲ QUAN TRỌNG, đọc kỹ:** để ý project thứ tư, `EventHub.Identity.Api`, **cũng** dùng `dotnet new classlib`, **KHÔNG** dùng `dotnet new web`. Module Api chỉ là thư viện chứa định nghĩa endpoint, sẽ được host Bootstrap nạp vào ở [Day 2](../README.md). Nếu lỡ tạo nó bằng `dotnet new web`, bạn sẽ có **hai host** với hai `Program.cs`, phá vỡ "một process duy nhất" của Modular Monolith, và phải xóa làm lại. (Lý do đầy đủ ở [Bước A, mục A3](00-kien-truc-tong-quan.md).)
 
-Mỗi lệnh `classlib` sinh kèm một file `Class1.cs` rỗng — ta xóa ở [Bước 4](04-don-template.md).
+Mỗi lệnh `classlib` sinh kèm một file `Class1.cs` rỗng, ta xóa ở [Bước 4](04-don-template.md).
 
 ## 1.4. Tạo 2 project Shared
 
@@ -62,10 +62,10 @@ dotnet new classlib --output src/Shared/EventHub.Contracts
 dotnet sln EventHub.slnx add src/Bootstrap/EventHub.Api/EventHub.Api.csproj src/Modules/Identity/EventHub.Identity.Domain/EventHub.Identity.Domain.csproj src/Modules/Identity/EventHub.Identity.Application/EventHub.Identity.Application.csproj src/Modules/Identity/EventHub.Identity.Infrastructure/EventHub.Identity.Infrastructure.csproj src/Modules/Identity/EventHub.Identity.Api/EventHub.Identity.Api.csproj src/Shared/EventHub.SharedKernel/EventHub.SharedKernel.csproj src/Shared/EventHub.Contracts/EventHub.Contracts.csproj
 ```
 
-- `dotnet sln EventHub.slnx add <csproj...>` — thêm một hoặc nhiều project vào solution.
+- `dotnet sln EventHub.slnx add <csproj...>`: thêm một hoặc nhiều project vào solution.
 - Khi đường dẫn project có thư mục cha (vd `src/Modules/Identity`), `dotnet sln` **tự tạo solution folder tương ứng** trong `.slnx` để nhóm chúng cho gọn. Bạn **không phải sửa XML bằng tay**.
 
-_Tham khảo:_ [dotnet sln command — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-sln) · [dotnet new — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-new).
+_Tham khảo:_ [dotnet sln command (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-sln) · [dotnet new (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-new).
 
 ## 1.6. Kiểm chứng
 
@@ -81,7 +81,7 @@ Phải thấy **đủ 7 project**: host `EventHub.Api`, bốn project Identity, 
 dotnet build EventHub.slnx
 ```
 
-Phải `Build succeeded`. (Lúc này host vẫn còn endpoint mẫu `"Hello World!"`, các library còn `Class1.cs` — bình thường, dọn ở Bước 4.)
+Phải `Build succeeded`. (Lúc này host vẫn còn endpoint mẫu `"Hello World!"`, các library còn `Class1.cs`, bình thường, dọn ở Bước 4.)
 
 > **Cạm bẫy thường gặp:**
 >
@@ -90,7 +90,7 @@ Phải `Build succeeded`. (Lúc này host vẫn còn endpoint mẫu `"Hello Worl
 
 ## 1.7. Về việc tham chiếu giữa project (chưa làm hôm nay)
 
-Sau này, khi một project (vd `EventHub.Identity.Domain`) cần dùng `Result<T>` từ SharedKernel, bạn sẽ thêm **project reference** bằng `dotnet add <project> reference <project khác>`. **Chưa cần hôm nay** — hôm nay chỉ dựng khung.
+Sau này, khi một project (vd `EventHub.Identity.Domain`) cần dùng `Result<T>` từ SharedKernel, bạn sẽ thêm **project reference** bằng `dotnet add <project> reference <project khác>`. **Chưa cần hôm nay**, hôm nay chỉ dựng khung.
 
 > **Ranh giới cứng cần nhớ từ ngày đầu:** module được phép tham chiếu `SharedKernel` và `Contracts`, nhưng **tuyệt đối không** tham chiếu `Domain`/`Infrastructure` của module _khác_. Giữ đúng để Tuần 4 (architecture test) không bắt lỗi.
 
@@ -101,4 +101,4 @@ Sau này, khi một project (vd `EventHub.Identity.Domain`) cần dùng `Result<
 - [x] `EventHub.Identity.Api` là class library (không có `Program.cs` riêng).
 - [x] `dotnet build EventHub.slnx` xanh.
 
-→ Sang [Bước 2 — Central Package Management](02-central-package-management.md).
+→ Sang [Bước 2: Central Package Management](02-central-package-management.md).

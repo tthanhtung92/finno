@@ -1,6 +1,6 @@
-# EventHub — Modular Monolith Backend (.NET 10)
+# EventHub: Modular Monolith Backend (.NET 10)
 
-> Một nền tảng đặt vé sự kiện được xây dựng để trình diễn các kỹ thuật backend cốt lõi: Authentication, Realtime, Caching, CDN, Messaging/Queue, và DevOps — mỗi phần ở mức *minimal nhưng đúng chuẩn production*.
+> Một nền tảng đặt vé sự kiện được xây dựng để trình diễn các kỹ thuật backend cốt lõi: Authentication, Realtime, Caching, CDN, Messaging/Queue, và DevOps, mỗi phần ở mức *minimal nhưng đúng chuẩn production*.
 
 **License:** MIT · **Kiến trúc:** Modular Monolith · **Nền tảng:** .NET 10 LTS
 
@@ -42,14 +42,14 @@ Ba nguyên tắc xuyên suốt:
 
 ### Lưu ý kỹ thuật quan trọng cho phỏng vấn
 
-- **Làn sóng thương mại hóa thư viện (04/2025+):** MediatR, AutoMapper, MassTransit, FluentAssertions, Moq đều chuyển sang license thương mại. Project này chọn thay thế MIT một cách có chủ đích — đây là điểm bạn nên kể.
-- **Wolverine codegen mode:** mặc định Dynamic (compile handler bằng Roslyn lúc startup) — tiện khi dev. Khi build Docker image production, chuyển sang **Static codegen** để tránh recompile mỗi cold start và tiết kiệm ~100MB RAM của Roslyn. Biết chi tiết này = điểm cộng lớn.
+- **Làn sóng thương mại hóa thư viện (04/2025+):** MediatR, AutoMapper, MassTransit, FluentAssertions, Moq đều chuyển sang license thương mại. Project này chọn thay thế MIT một cách có chủ đích, đây là điểm bạn nên kể.
+- **Wolverine codegen mode:** mặc định Dynamic (compile handler bằng Roslyn lúc startup), tiện khi dev. Khi build Docker image production, chuyển sang **Static codegen** để tránh recompile mỗi cold start và tiết kiệm ~100MB RAM của Roslyn. Biết chi tiết này = điểm cộng lớn.
 
 ---
 
 ## 3. Cấu trúc thư mục Solution (Modular Monolith)
 
-Mô hình: mỗi **module** là một vertical slice tự chứa (Domain + Application + Infrastructure + API endpoints), giao tiếp với nhau **chỉ qua message bus (Wolverine) hoặc public contracts** — không reference trực tiếp internal của nhau. Đây là điều khiến nó "modular" chứ không phải monolith rối.
+Mô hình: mỗi **module** là một vertical slice tự chứa (Domain + Application + Infrastructure + API endpoints), giao tiếp với nhau **chỉ qua message bus (Wolverine) hoặc public contracts**, không reference trực tiếp internal của nhau. Đây là điều khiến nó "modular" chứ không phải monolith rối.
 
 ```text
 EventHub/
@@ -139,7 +139,7 @@ EventHub/
 
 > Giả định quỹ thời gian: tuần này 1–2h/ngày, các tuần sau 3–4h/ngày. Mỗi tuần kết thúc bằng một commit có thể demo được.
 
-### Tuần 1 — Nền móng (1–2h/ngày, nhẹ)
+### Tuần 1: Nền móng (1–2h/ngày, nhẹ)
 
 Mục tiêu: solution Modular Monolith chạy được với **1 module hoàn chỉnh** (Identity).
 
@@ -147,14 +147,14 @@ Mục tiêu: solution Modular Monolith chạy được với **1 module hoàn ch
 |------|------|--------|
 | 1 | Khởi tạo `EventHub.slnx`, cấu trúc thư mục, Central Package Management, `Directory.Build.props`, LICENSE (MIT), README khung | Repo public push lên GitHub |
 | 2 | Docker Compose: postgres + redis + minio. EF Core 10 + first migration. Setup `AddModules()/UseModules()` pattern | `docker compose up` lên được hạ tầng |
-| 3 | Module Identity — `ApplicationUser`/`Role` (Infrastructure) + `RefreshToken` POCO (Domain) + DbContext | Migration Identity chạy |
+| 3 | Module Identity: `ApplicationUser`/`Role` (Infrastructure) + `RefreshToken` POCO (Domain) + DbContext | Migration Identity chạy |
 | 4 | JWT authentication + refresh token + role-based authorization. Login/Register endpoints | Đăng nhập trả JWT thật |
 | 5 | Global exception handling middleware, `Result<T>` pattern, FluentValidation cho Register | Lỗi trả về chuẩn ProblemDetails |
-| 6–7 | Module Events — CRUD đầy đủ, pagination, validation. Vài unit test domain | Events API chạy + test xanh |
+| 6–7 | Module Events: CRUD đầy đủ, pagination, validation. Vài unit test domain | Events API chạy + test xanh |
 
 **Mốc cuối tuần 1:** clone về, `docker compose up`, đăng nhập, CRUD event được.
 
-### Tuần 2 — Performance & Caching (3–4h/ngày)
+### Tuần 2: Performance & Caching (3–4h/ngày)
 
 Mục tiêu: thể hiện hiểu cache *đúng cách*, không chỉ bật cache.
 
@@ -170,7 +170,7 @@ Mục tiêu: thể hiện hiểu cache *đúng cách*, không chỉ bật cache.
 
 **Mốc cuối tuần 2:** README có bảng benchmark "trước/sau cache" với số liệu thật.
 
-### Tuần 3 — Realtime & Messaging (3–4h/ngày) — phần "đinh"
+### Tuần 3: Realtime & Messaging (3–4h/ngày), phần "đinh"
 
 Đây là phần đầu tư nhiều nhất và kể thành câu chuyện khi phỏng vấn.
 
@@ -186,7 +186,7 @@ Mục tiêu: thể hiện hiểu cache *đúng cách*, không chỉ bật cache.
 
 **Mốc cuối tuần 3:** demo được kịch bản 2 người mua vé cuối cùng cùng lúc → đúng 1 người thành công, không oversell.
 
-### Tuần 4 — DevOps & Hoàn thiện (3–4h/ngày)
+### Tuần 4: DevOps & Hoàn thiện (3–4h/ngày)
 
 | Ngày | Việc | Output |
 |------|------|--------|
@@ -219,15 +219,15 @@ Project coi là xong khi:
 
 ## 7. Bẫy cần tránh
 
-- **Đừng làm mọi phần mỏng như nhau.** Dồn chiều sâu vào Tuần 3 (messaging/concurrency) — đó là thứ phân biệt Middle với Junior.
+- **Đừng làm mọi phần mỏng như nhau.** Dồn chiều sâu vào Tuần 3 (messaging/concurrency), đó là thứ phân biệt Middle với Junior.
 - **Đừng ôm 20 tính năng dở dang.** 3 module hoàn chỉnh > 30 module rối.
 - **Đừng bỏ README đến phút cuối.** Nó là thứ được đọc đầu tiên, không phải code.
-- **Đừng dùng thư viện đã thương mại hóa** rồi không giải thích được vì sao — phỏng vấn viên 2026 sẽ hỏi.
+- **Đừng dùng thư viện đã thương mại hóa** rồi không giải thích được vì sao, phỏng vấn viên 2026 sẽ hỏi.
 
 ---
 
 ## 8. Câu chuyện kể khi phỏng vấn (chuẩn bị sẵn)
 
-> "Tôi gặp bài toán overselling khi nhiều người mua vé cuối cùng cùng lúc. Tôi thử cách A (pessimistic lock) — đơn giản nhưng giết throughput. Tôi chuyển sang optimistic concurrency với rowversion của EF Core, kết hợp transactional outbox của Wolverine để đảm bảo ghi DB và publish event là atomic. Tôi cũng làm consumer idempotent để xử lý message trùng. Kết quả demo được: 2 request đồng thời cho 1 vé cuối → đúng 1 thành công."
+> "Tôi gặp bài toán overselling khi nhiều người mua vé cuối cùng cùng lúc. Tôi thử cách A (pessimistic lock), đơn giản nhưng giết throughput. Tôi chuyển sang optimistic concurrency với rowversion của EF Core, kết hợp transactional outbox của Wolverine để đảm bảo ghi DB và publish event là atomic. Tôi cũng làm consumer idempotent để xử lý message trùng. Kết quả demo được: 2 request đồng thời cho 1 vé cuối → đúng 1 thành công."
 
 Một câu chuyện như vậy giá trị hơn cả danh sách công nghệ.

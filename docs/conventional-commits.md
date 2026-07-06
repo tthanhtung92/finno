@@ -1,4 +1,4 @@
-# Conventional Commits — Hướng dẫn nhanh
+# Conventional Commits: Hướng dẫn nhanh
 
 ## Cú pháp
 
