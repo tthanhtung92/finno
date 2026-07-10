@@ -7,6 +7,7 @@ using EventHub.Identity.Infrastructure.Persistence;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 
 namespace EventHub.Identity.Infrastructure.Authentication;
 
@@ -46,6 +47,73 @@ public class IdentityService(
         return isValid ? user.Id : null;
     }
 
+    public async Task<string> CreateRefreshTokenAsync(Guid userId, string ip, CancellationToken cancellationToken)
+    {
+        var now = _timeProvider.GetUtcNow();
+
+        var (newToken, newRefreshToken) = await GenerateRefreshToken(userId, ip, now);
+
+        _dbContext.RefreshTokens.Add(newRefreshToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return newToken;
+    }
+
+    public async Task<RotatedRefreshToken?> RotateRefreshTokenAsync(string rawRefreshToken, string ip, CancellationToken cancellationToken)
+    {
+        var now = _timeProvider.GetUtcNow();
+
+        var rawTokenHash = Convert.ToBase64String(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(rawRefreshToken)));
+
+        var dataToken = await _dbContext.RefreshTokens.FirstOrDefaultAsync(x => x.TokenHash == rawTokenHash, cancellationToken: cancellationToken);
+
+        // Kiểm tra xem có tồn tại rawTokenHash dưới DB không
+        if (dataToken == null) return null;
+
+        // Kiểm tra xem rawTokenHash đã revoke lần nào chưa
+        if (dataToken.RevokedAt != null)
+        {
+            await _dbContext.RefreshTokens
+                .Where(x => x.UserId == dataToken.UserId && x.RevokedAt == null)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(y => y.RevokedAt, now), cancellationToken: cancellationToken);
+
+            return null;
+        }
+
+        // Kiểm tra xem rawTokenHash đã hết hạn chưa
+        if (dataToken.ExpiresAt <= now) return null;
+
+        var (newToken, newRefreshToken) = await GenerateRefreshToken(dataToken.UserId, ip, now);
+
+        // Sửa cũ
+        dataToken.RevokedAt = now;
+        dataToken.ReplacedByTokenHash = newRefreshToken.TokenHash;
+
+        // Thêm mới
+        _dbContext.RefreshTokens.Add(newRefreshToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return new RotatedRefreshToken(dataToken.UserId, newToken);
+    }
+
+    public async Task RevokeRefreshTokenAsync(string rawRefreshToken, CancellationToken cancellationToken)
+    {
+        var now = _timeProvider.GetUtcNow();
+
+        var rawTokenHash = Convert.ToBase64String(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(rawRefreshToken)));
+
+        var dataToken = await _dbContext.RefreshTokens.FirstOrDefaultAsync(x => x.TokenHash == rawTokenHash, cancellationToken: cancellationToken);
+
+        if (dataToken != null && dataToken.RevokedAt == null)
+        {
+            dataToken.RevokedAt = now;
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+    }
+
+    #region Get Helper
+
     public async Task<IReadOnlyList<string>> GetRolesAsync(Guid userId)
     {
         var user = await _userManager.FindByIdAsync(userId.ToString());
@@ -55,27 +123,36 @@ public class IdentityService(
         return roles == null ? [] : roles.ToList();
     }
 
-    public async Task<string> CreateRefreshTokenAsync(Guid userId, string ip, CancellationToken cancellationToken)
+    public async Task<string?> GetEmailAsync(Guid userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        return user?.Email;
+    }
+
+    #endregion Get Helper
+
+    #region Private Method
+
+    private async Task<(string newToken, RefreshToken newRefreshToken)> GenerateRefreshToken(Guid userId, string ip, DateTimeOffset time)
     {
         var randomBytes = RandomNumberGenerator.GetBytes(64);
-        var rawToken = WebEncoders.Base64UrlEncode(randomBytes);
+        var newToken = WebEncoders.Base64UrlEncode(randomBytes);
 
-        var tokenHash = Convert.ToBase64String(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(rawToken)));
-        var refreshToken = new RefreshToken
+        var newTokenHash = Convert.ToBase64String(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(newToken)));
+        var newRefreshToken = new RefreshToken
         {
             Id = Guid.NewGuid(),
             UserId = userId,
-            TokenHash = tokenHash,
-            ExpiresAt = _timeProvider.GetUtcNow().AddDays(_jwtOptions.RefreshTokenLifetimeDays),
-            CreatedAt = _timeProvider.GetUtcNow(),
+            TokenHash = newTokenHash,
+            ExpiresAt = time.AddDays(_jwtOptions.RefreshTokenLifetimeDays),
+            CreatedAt = time,
             CreatedByIp = ip
         };
 
-        _dbContext.RefreshTokens.Add(refreshToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
-
-        return rawToken;
+        return (newToken, newRefreshToken);
     }
+
+    #endregion
 }
 
 internal static class RegisterFailureReasonExtensions

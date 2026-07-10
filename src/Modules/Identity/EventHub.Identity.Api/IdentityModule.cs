@@ -45,5 +45,18 @@ public sealed class IdentityModule : IModule
             var authResult = await svc.LoginAsync(req, ip, cancellationToken);
             return authResult != null ? Results.Ok(authResult) : Results.Unauthorized();
         });
+
+        endpoints.MapPost("/identity/refresh", async (RefreshRequest req, AuthService svc, HttpContext httpCtx, CancellationToken cancellationToken) =>
+        {
+            var ip = httpCtx.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+            var authResult = await svc.RefreshAsync(req.RefreshToken, ip, cancellationToken);
+            return authResult != null ? Results.Ok(authResult) : Results.Unauthorized();
+        });
+
+        endpoints.MapPost("/identity/logout", async (RefreshRequest req, AuthService svc, CancellationToken cancellationToken) =>
+        {
+            await svc.LogoutAsync(req.RefreshToken, cancellationToken);
+            return Results.NoContent();
+        });
     }
 }

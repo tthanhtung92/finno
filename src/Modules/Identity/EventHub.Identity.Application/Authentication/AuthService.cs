@@ -3,6 +3,7 @@ namespace EventHub.Identity.Application.Authentication;
 public record AuthResult(string AccessToken, string RefreshToken, DateTime AccessTokenExpiresAt);
 public record RegisterRequest(string Email, string Password);
 public record LoginRequest(string Email, string Password);
+public record RefreshRequest(string RefreshToken);
 
 public class AuthService(IIdentityService identityService, IJwtTokenGenerator jwtTokenGenerator)
 {
@@ -26,5 +27,24 @@ public class AuthService(IIdentityService identityService, IJwtTokenGenerator jw
         var refreshToken = await _identityService.CreateRefreshTokenAsync(userId.Value, ip, cancellationToken);
 
         return new AuthResult(accessToken.Value, refreshToken, accessToken.ExpiresAt);
+    }
+
+    public async Task<AuthResult?> RefreshAsync(string rawRefreshToken, string ip, CancellationToken cancellationToken)
+    {
+        var rotated = await _identityService.RotateRefreshTokenAsync(rawRefreshToken, ip, cancellationToken);
+        if (rotated == null) return null;
+
+        var email = await _identityService.GetEmailAsync(rotated.UserId);
+        if (email == null) return null;
+
+        var roles = await _identityService.GetRolesAsync(rotated.UserId);
+        var accessToken = _jwtTokenGenerator.GenerateToken(rotated.UserId.ToString(), email, roles);
+
+        return new AuthResult(accessToken.Value, rotated.RawRefreshToken, accessToken.ExpiresAt);
+    }
+
+    public async Task LogoutAsync(string rawRefreshToken, CancellationToken cancellationToken)
+    {
+        await _identityService.RevokeRefreshTokenAsync(rawRefreshToken, cancellationToken);
     }
 }
