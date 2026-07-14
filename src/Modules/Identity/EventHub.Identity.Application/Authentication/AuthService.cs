@@ -14,26 +14,29 @@ public class AuthService(IIdentityService identityService, IJwtTokenGenerator jw
         return result;
     }
 
-    public async Task<AuthResult?> LoginAsync(LoginRequest request, string ip, CancellationToken cancellationToken)
+    public async Task<Result<AuthResult>> LoginAsync(LoginRequest request, string ip, CancellationToken cancellationToken)
     {
         var userId = await _identityService.VerifyPasswordAsync(request.Email, request.Password);
-        if (userId == null) return null;
+
+        if (userId is null)
+            return new Error("Identity.InvalidCredentials", "Incorrect email or password.", ErrorType.Unauthorized);
 
         var roles = await _identityService.GetRolesAsync(userId.Value);
-
         var accessToken = _jwtTokenGenerator.GenerateToken(userId.Value.ToString(), request.Email, roles);
         var refreshToken = await _identityService.CreateRefreshTokenAsync(userId.Value, ip, cancellationToken);
 
         return new AuthResult(accessToken.Value, refreshToken, accessToken.ExpiresAt);
     }
 
-    public async Task<AuthResult?> RefreshAsync(string rawRefreshToken, string ip, CancellationToken cancellationToken)
+    public async Task<Result<AuthResult>> RefreshAsync(string rawRefreshToken, string ip, CancellationToken cancellationToken)
     {
         var rotated = await _identityService.RotateRefreshTokenAsync(rawRefreshToken, ip, cancellationToken);
-        if (rotated == null) return null;
+        if (rotated is null)
+            return new Error("Identity.InvalidRefreshToken", "Invalid or expired refresh token.", ErrorType.Unauthorized);
 
         var email = await _identityService.GetEmailAsync(rotated.UserId);
-        if (email == null) return null;
+        if (email is null)
+            return new Error("Identity.UserNotFound", "Invalid or expired refresh token.", ErrorType.Unauthorized);
 
         var roles = await _identityService.GetRolesAsync(rotated.UserId);
         var accessToken = _jwtTokenGenerator.GenerateToken(rotated.UserId.ToString(), email, roles);

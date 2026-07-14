@@ -12,6 +12,8 @@ public sealed class IdentityDemoEndpoints
 {
     public static void MapEndpoints(IEndpointRouteBuilder endpoints)
     {
+        endpoints.MapGet("/identity/ping", () => "Identity pong!");
+
         endpoints.MapGet("/identity/me", (ClaimsPrincipal user) =>
         {
             var userId = user.FindFirstValue(IdentityClaimTypes.Sub);

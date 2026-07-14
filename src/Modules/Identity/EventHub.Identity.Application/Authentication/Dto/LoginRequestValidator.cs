@@ -2,9 +2,9 @@
 
 namespace EventHub.Identity.Application.Authentication.Dto;
 
-public sealed class RegisterRequestValidator : AbstractValidator<RegisterRequest>
+public class LoginRequestValidator : AbstractValidator<LoginRequest>
 {
-    public RegisterRequestValidator()
+    public LoginRequestValidator()
     {
         RuleFor(x => x.Email)
             .NotEmpty()
@@ -12,6 +12,7 @@ public sealed class RegisterRequestValidator : AbstractValidator<RegisterRequest
 
         RuleFor(x => x.Password)
             .NotEmpty()
-            .MinimumLength(8);
+            .MinimumLength(8)
+            .Matches(@"[A-Z]+").Matches(@"[a-z]+").Matches(@"[0-9]+");
     }
 }

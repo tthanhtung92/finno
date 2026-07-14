@@ -19,6 +19,8 @@ public sealed class IdentityModule : IModule
 
         // Validator
         services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
+        services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
+        services.AddValidatorsFromAssemblyContaining<RefreshRequestValidator>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder endpoints)
