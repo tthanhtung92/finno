@@ -1,4 +1,4 @@
-name: eventhub
+name: finno
 
 volumes:
   pgdata:
