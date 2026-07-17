@@ -93,8 +93,9 @@ finmy/
 │   │
 │   └── Shared/
 │       ├── Finmy.SharedKernel/         # Result<T>, DomainEvent base, guards
+│       ├── Finmy.Modularity/           # IModule, AddModules()/UseModules(), ResultExtensions, ValidationFilter
 │       └── Finmy.Contracts/            # Integration events (public giữa modules)
-│                                        # vd: TransactionPostedEvent, EnvelopeOverspentEvent
+│                                        # vd: TransactionPostedEvent, EnvelopeCreatedEvent, EnvelopeOverspentEvent
 │
 ├── tests/
 │   ├── Finmy.UnitTests/                # Domain logic, handlers (NSubstitute)
@@ -157,9 +158,9 @@ Mục tiêu: solution Modular Monolith chạy được với **1 module hoàn ch
 | 3 | Module Identity: `ApplicationUser`/`Role` (Infrastructure) + `RefreshToken` POCO (Domain) + DbContext | Migration Identity chạy |
 | 4 | JWT authentication + refresh token + role-based authorization. Login/Register endpoints | Đăng nhập trả JWT thật |
 | 5 | Global exception handling middleware, `Result<T>` pattern, FluentValidation cho Register | Lỗi trả về chuẩn ProblemDetails |
-| 6-7 | Module Budgeting: CRUD Space / Account / Category / Envelope, pagination, validation. Vài unit test domain | Budgeting API chạy + test xanh |
+| 6-7 | Module Budgeting: CRUD Category / Envelope (tham chiếu nhau bằng Id), pagination, validation. Vài unit test domain. Space (gốc chia sẻ) + Account + phân quyền theo Member hoãn tới khi bài toán chia sẻ bắt đầu (Tuần 3) | Budgeting API chạy + test xanh |
 
-**Mốc cuối tuần 1:** clone về, `docker compose up`, đăng nhập, tạo Space và phong bì ngân sách được.
+**Mốc cuối tuần 1:** clone về, `docker compose up`, đăng nhập, tạo category và phong bì (envelope) ngân sách được.
 
 ### Tuần 2: Performance & Caching (3-4h/ngày)
 
