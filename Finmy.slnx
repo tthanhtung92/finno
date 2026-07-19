@@ -12,6 +12,12 @@
     <Project Path="src/Bootstrap/Finmy.Api/Finmy.Api.csproj" />
   </Folder>
   <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Budgeting/">
+    <Project Path="src/Modules/Budgeting/Finmy.Budgeting.Api/Finmy.Budgeting.Api.csproj" />
+    <Project Path="src/Modules/Budgeting/Finmy.Budgeting.Application/Finmy.Budgeting.Application.csproj" />
+    <Project Path="src/Modules/Budgeting/Finmy.Budgeting.Domain/Finmy.Budgeting.Domain.csproj" />
+    <Project Path="src/Modules/Budgeting/Finmy.Budgeting.Infrastructure/Finmy.Budgeting.Infrastructure.csproj" />
+  </Folder>
   <Folder Name="/src/Modules/Identity/">
     <Project Path="src/Modules/Identity/Finmy.Identity.Api/Finmy.Identity.Api.csproj" />
     <Project Path="src/Modules/Identity/Finmy.Identity.Application/Finmy.Identity.Application.csproj" />

@@ -11,8 +11,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Modules\Identity\Finmy.Identity.Api\Finmy.Identity.Api.csproj" />
     <ProjectReference Include="..\..\Shared\Finmy.Modularity\Finmy.Modularity.csproj" />
+    <ProjectReference Include="..\..\Modules\Identity\Finmy.Identity.Api\Finmy.Identity.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\Budgeting\Finmy.Budgeting.Api\Finmy.Budgeting.Api.csproj" />
   </ItemGroup>
 
 </Project>

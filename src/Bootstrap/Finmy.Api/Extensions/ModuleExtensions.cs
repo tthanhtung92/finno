@@ -1,3 +1,4 @@
+using Finmy.Budgeting.Api;
 using Finmy.Identity.Api;
 using Finmy.Modularity.Interfaces;
 
@@ -5,7 +6,7 @@ namespace Finmy.Api.Extensions;
 
 public static class ModuleExtensions
 {
-    private static readonly IReadOnlyList<IModule> Modules =  [new IdentityModule()];
+    private static readonly IReadOnlyList<IModule> Modules =  [new IdentityModule(), new BudgetingModule()];
 
     public static void AddModules(this IServiceCollection services, IConfiguration configuration)
     {
