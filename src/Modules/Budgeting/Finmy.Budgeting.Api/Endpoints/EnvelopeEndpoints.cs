@@ -22,10 +22,33 @@ public sealed class EnvelopeEndpoints
             .AddEndpointFilter<ValidationFilter<CreateEnvelopeRequest>>();
 
         endpoints
+            .MapDelete("/envelopes/{id:guid}", async (Guid id, EnvelopeService svc, CancellationToken cancellationToken) =>
+            {
+                var result = await svc.DeleteAsync(id, cancellationToken); 
+                return result.Match(Results.NoContent);
+            });
+
+        endpoints
             .MapGet("/envelopes/{id:guid}", async (Guid id, EnvelopeService svc, CancellationToken cancellationToken) =>
             {
                 var result = await svc.GetByIdAsync(id, cancellationToken);
                 return result.Match(Results.Ok);
             });
+
+        endpoints
+            .MapGet("/envelopes", async ([AsParameters] ListEnvelopesRequest query, EnvelopeService svc, CancellationToken cancellationToken) =>
+            {
+                var result = await svc.GetPagedAsync(query.Page, query.PageSize, cancellationToken);
+                return Results.Ok(result);
+            })
+            .AddEndpointFilter<ValidationFilter<ListEnvelopesRequest>>();
+
+        endpoints
+            .MapPut("/envelopes/{id:guid}", async (Guid id, UpdateEnvelopeRequest req, EnvelopeService svc, CancellationToken cancellationToken) =>
+            {
+                var result = await svc.UpdateAsync(id, req, cancellationToken);
+                return result.Match(Results.Ok);
+            })
+            .AddEndpointFilter<ValidationFilter<UpdateEnvelopeRequest>>();
     }
 }

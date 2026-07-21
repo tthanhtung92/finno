@@ -7,9 +7,19 @@ namespace Finmy.Budgeting.Infrastructure.Persistence;
 
 internal sealed class EnvelopeRepository(BudgetingDbContext dbContext) : IEnvelopeRepository
 {
-    public async Task AddAsync(Envelope envelope, CancellationToken cancellationToken)
+    public void Add(Envelope envelope)
     {
-        await dbContext.Envelopes.AddAsync(envelope, cancellationToken);
+        dbContext.Envelopes.Add(envelope);
+    }
+
+    public void Remove(Envelope envelope)
+    {
+        dbContext.Envelopes.Remove(envelope);
+    }
+
+    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
+    {
+        return await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<Envelope?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
@@ -17,8 +27,16 @@ internal sealed class EnvelopeRepository(BudgetingDbContext dbContext) : IEnvelo
         return await dbContext.Envelopes.FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
     }
 
-    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
+    public async Task<(IReadOnlyList<Envelope> Items, int TotalCount)> GetPagedAsync(int page, int pageSize, CancellationToken cancellationToken)
     {
-        return await dbContext.SaveChangesAsync(cancellationToken);
+        var query = dbContext.Envelopes
+            .OrderBy(e => e.PeriodStartUtc)
+            .ThenBy(e => e.Id);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
+
+        return (items, totalCount);
     }
 }

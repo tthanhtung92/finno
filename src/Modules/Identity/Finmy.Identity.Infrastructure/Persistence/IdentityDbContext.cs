@@ -10,18 +10,18 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
 {
     public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    protected override void OnModelCreating(ModelBuilder builder)
     {
-        base.OnModelCreating(modelBuilder);
-        modelBuilder.HasDefaultSchema("identity");
+        base.OnModelCreating(builder);
+        builder.HasDefaultSchema("identity");
 
-        modelBuilder.Entity<ApplicationUser>()
+        builder.Entity<ApplicationUser>()
             .HasMany(u => u.RefreshTokens)
             .WithOne()
             .HasForeignKey(rt => rt.UserId)
             .IsRequired();
 
-        modelBuilder.Entity<RefreshToken>()
+        builder.Entity<RefreshToken>()
             .HasIndex(rt => rt.TokenHash)
             .IsUnique();
     }

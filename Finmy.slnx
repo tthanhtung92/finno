@@ -29,4 +29,7 @@
     <Project Path="src/Shared/Finmy.Modularity/Finmy.Modularity.csproj" />
     <Project Path="src/Shared/Finmy.SharedKernel/Finmy.SharedKernel.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Finmy.UnitTests/Finmy.UnitTests.csproj" />
+  </Folder>
 </Solution>

@@ -7,7 +7,7 @@ namespace Finmy.Modularity.Extensions;
 public static class ResultExtensions
 {
     /// <summary>
-    /// Chuyển đổi đối tượng Result thành HTTP IResult (ASP.NET Core Minimal APIs).
+    /// Chuyển đổi đối tượng Result Generic thành HTTP IResult (ASP.NET Core Minimal APIs).
     /// </summary>
     /// <typeparam name="T">Kiểu dữ liệu của giá trị thành công.</typeparam>
     /// <param name="result">Đối tượng kết quả cần kiểm tra.</param>
@@ -19,6 +19,17 @@ public static class ResultExtensions
         // - Nếu IsSuccess = true: Chỉ chạy nhánh trái, truyền dữ liệu vào hàm onSuccess (ví dụ: Results.Ok(user)).
         // - Nếu IsSuccess = false: Bỏ qua hoàn toàn hàm onSuccess, nhảy sang nhánh phải để format và trả về lỗi.
         return result.IsSuccess ? onSuccess(result.Value) : result.ToProblemDetails();
+    }
+
+    /// <summary>
+    /// Overload Match Result không Generic
+    /// </summary>
+    /// <param name="result"></param>
+    /// <param name="onSuccess"></param>
+    /// <returns></returns>
+    public static IResult Match(this Result result, Func<IResult> onSuccess)
+    {
+        return result.IsSuccess ? onSuccess() : result.ToProblemDetails();
     }
 
     public static IResult ToProblemDetails(this Result result)

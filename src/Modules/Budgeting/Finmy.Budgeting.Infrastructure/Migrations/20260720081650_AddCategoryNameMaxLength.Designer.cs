@@ -3,6 +3,7 @@ using System;
 using Finmy.Budgeting.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Finmy.Budgeting.Infrastructure.Migrations
 {
     [DbContext(typeof(BudgetingDbContext))]
-    partial class BudgetingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260720081650_AddCategoryNameMaxLength")]
+    partial class AddCategoryNameMaxLength
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -86,15 +89,6 @@ namespace Finmy.Budgeting.Infrastructure.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("Envelopes", "budgeting");
-                });
-
-            modelBuilder.Entity("Finmy.Budgeting.Domain.Envelopes.Envelope", b =>
-                {
-                    b.HasOne("Finmy.Budgeting.Domain.Categories.Category", null)
-                        .WithMany()
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

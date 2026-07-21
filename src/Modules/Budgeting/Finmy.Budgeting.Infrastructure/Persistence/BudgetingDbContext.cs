@@ -10,31 +10,45 @@ public sealed class BudgetingDbContext(DbContextOptions<BudgetingDbContext> opti
     public DbSet<Envelope> Envelopes { get; set; }
     public DbSet<Category> Categories { get; set; }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    protected override void OnModelCreating(ModelBuilder builder)
     {
-        base.OnModelCreating(modelBuilder);
-        modelBuilder.HasDefaultSchema("budgeting");
+        base.OnModelCreating(builder);
+        builder.HasDefaultSchema("budgeting");
 
-        modelBuilder.Entity<Envelope>()
-            .Property(p => p.Name)
+        #region Envelope
+
+        builder.Entity<Envelope>()
+            .Property(x => x.Name)
             .HasMaxLength(200);
 
-        modelBuilder.Entity<Envelope>()
-            .Property(p => p.Allocated)
+        builder.Entity<Envelope>()
+            .Property(x => x.Allocated)
             .HasPrecision(18, 2);
 
-        modelBuilder.Entity<Envelope>()
+        builder.Entity<Envelope>()
             .HasIndex(x => x.CategoryId);
 
-        modelBuilder.Entity<Category>()
-            .Property(p => p.Name)
+        builder.Entity<Envelope>()
+            .HasOne<Category>()
+            .WithMany()
+            .HasForeignKey(x => x.CategoryId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        #endregion Envelope
+
+        #region Category
+
+        builder.Entity<Category>()
+            .Property(x => x.Name)
             .HasMaxLength(200);
 
-        // Seed Category
-        modelBuilder.Entity<Category>()
+        // Seed
+        builder.Entity<Category>()
             .HasData(
                 new { Id = Guid.Parse("11111111-1111-1111-1111-111111111111"), Name = "Ăn uống" },
                 new { Id = Guid.Parse("22222222-2222-2222-2222-222222222222"), Name = "Nhà cửa" }
             );
+
+        #endregion Category
     }
 }

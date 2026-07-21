@@ -4,7 +4,10 @@ namespace Finmy.Budgeting.Application.Abstractions;
 
 public interface IEnvelopeRepository
 {
-    Task AddAsync(Envelope envelope, CancellationToken cancellationToken);
-    Task<Envelope?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+    void Add(Envelope envelope);
+    void Remove(Envelope envelope);
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+    Task<Envelope?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+    Task<(IReadOnlyList<Envelope> Items, int TotalCount)> GetPagedAsync(int page, int pageSize, CancellationToken cancellationToken);
 }
