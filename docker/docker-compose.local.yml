@@ -5,6 +5,7 @@ volumes:
   redisdata:
   minio_data:
   pgadmin_data:
+  redisinsight_data:
 
 services:
   postgres:
@@ -56,6 +57,16 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  redisinsight:
+    image: redis/redisinsight:3.6.0
+    restart: unless-stopped
+    ports:
+      - "5540:5540"
+    volumes:
+      - redisinsight_data:/data
+    depends_on:
+      - redis
 
   minio:
     image: minio/minio:RELEASE.2025-09-07T16-13-09Z
