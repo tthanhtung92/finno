@@ -6,6 +6,8 @@ public static class BudgetingCachePolicy
 {
     public const string EnvelopeListKeyPrefix = "envelopes:list";
     public const string EnvelopeListTag = "tag:envelopes:list";
+    public const string EnvelopeListOutputPolicy = "EnvelopeList";
+    public const string OutputListTag = "oc:envelopes:list";
     public static readonly HybridCacheEntryOptions EnvelopeListEntry = new()
     {
         Expiration = TimeSpan.FromMinutes(2),
@@ -13,6 +15,8 @@ public static class BudgetingCachePolicy
     };
 
     public const string EnvelopeSummaryKeyPrefix = "envelopes:summary";
+    public const string ReportSummaryOutputPolicy = "ReportSummary";
+    public const string OutputSummaryTag = "oc:envelopes:summary";
     public static string SummaryTag(int year, int month) => $"tag:envelopes:summary:{year}-{month:D2}";
     public static IReadOnlyList<string> SummaryTagsForPeriod(DateTimeOffset periodStartUtc, DateTimeOffset periodEndUtc)
     {

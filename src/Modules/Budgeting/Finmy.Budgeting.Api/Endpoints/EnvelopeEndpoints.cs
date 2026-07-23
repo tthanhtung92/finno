@@ -1,4 +1,5 @@
-﻿using Finmy.Budgeting.Application.Envelopes;
+﻿using Finmy.Budgeting.Application.Caching;
+using Finmy.Budgeting.Application.Envelopes;
 using Finmy.Budgeting.Application.Envelopes.Dtos;
 using Finmy.Modularity.Extensions;
 using Finmy.Modularity.Filters;
@@ -6,6 +7,7 @@ using Finmy.Modularity.Filters;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Finmy.Budgeting.Api.Endpoints;
 
@@ -41,7 +43,8 @@ public sealed class EnvelopeEndpoints
                 var result = await svc.GetPagedAsync(query.Page, query.PageSize, cancellationToken);
                 return Results.Ok(result);
             })
-            .AddEndpointFilter<ValidationFilter<ListEnvelopesRequest>>();
+            .AddEndpointFilter<ValidationFilter<ListEnvelopesRequest>>()
+            .CacheOutput(BudgetingCachePolicy.EnvelopeListOutputPolicy);
 
         endpoints
             .MapPut("/envelopes/{id:guid}", async (Guid id, UpdateEnvelopeRequest req, EnvelopeService svc, CancellationToken cancellationToken) =>
@@ -57,6 +60,7 @@ public sealed class EnvelopeEndpoints
                 var result = await svc.GetMonthlySummaryAsync(req.Year, req.Month, cancellationToken);
                 return Results.Ok(result);
             })
-            .AddEndpointFilter<ValidationFilter<MonthlySummaryRequest>>();
+            .AddEndpointFilter<ValidationFilter<MonthlySummaryRequest>>()
+            .CacheOutput(BudgetingCachePolicy.ReportSummaryOutputPolicy);
     }
 }

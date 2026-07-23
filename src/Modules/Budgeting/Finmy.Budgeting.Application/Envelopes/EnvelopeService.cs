@@ -14,7 +14,8 @@ public sealed class EnvelopeService(
     IEnvelopeRepository envelopeRepository,
     ICategoryRepository categoryRepository,
     HybridCache cache,
-    ILogger<EnvelopeService> logger)
+    ILogger<EnvelopeService> logger,
+    IOutputCacheInvalidator outputCache)
 {
     public async Task<Result<Guid>> CreateAsync(CreateEnvelopeRequest request, CancellationToken cancellationToken)
     {
@@ -178,9 +179,9 @@ public sealed class EnvelopeService(
         return result;
     }
 
-    private ValueTask InvalidateAsync(IReadOnlyList<string> summaryTags, CancellationToken cancellationToken)
+    private async Task InvalidateAsync(IReadOnlyList<string> summaryTags, CancellationToken cancellationToken)
     {
-        string[] tags = [BudgetingCachePolicy.EnvelopeListTag, .. summaryTags];
-        return cache.RemoveByTagAsync(tags, cancellationToken);
+        await cache.RemoveByTagAsync([BudgetingCachePolicy.EnvelopeListTag, .. summaryTags], cancellationToken);
+        await outputCache.EvictByTagsAsync([BudgetingCachePolicy.OutputListTag, BudgetingCachePolicy.OutputSummaryTag], cancellationToken);
     }
 }

@@ -1,6 +1,7 @@
 using Finmy.Api.Extensions;
 using Finmy.Api.Middleware;
 
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Caching.Hybrid;
 
 using Scalar.AspNetCore;
@@ -23,13 +24,21 @@ builder.Services.AddHybridCache(options =>
         LocalCacheExpiration = TimeSpan.FromMinutes(1)
     };
 });
+builder.Services.AddResponseCompression(options => 
+{ 
+    options.EnableForHttps = true; 
+    options.Providers.Add<BrotliCompressionProvider>(); 
+    options.Providers.Add<GzipCompressionProvider>(); 
+});
 
 var app = builder.Build();
 
+app.UseResponseCompression();
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseOutputCache();
 app.UseModules();
 
 if (app.Environment.IsDevelopment())
