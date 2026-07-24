@@ -16,55 +16,81 @@ public sealed class EnvelopeEndpoints
 {
     public static void MapEndpoints(IEndpointRouteBuilder endpoints)
     {
-        endpoints
-            .MapPost("/envelopes", async (CreateEnvelopeRequest req, EnvelopeService svc, CancellationToken cancellationToken) =>
-            {
-                var result = await svc.CreateAsync(req, cancellationToken);
-                return result.Match(id => Results.Created($"/envelopes/{id}", new { id }));
-            })
+        var group = endpoints.MapGroup("/envelopes");
+
+        group.MapPost("/", CreateEnvelopeAsync)
             .AddEndpointFilter<ValidationFilter<CreateEnvelopeRequest>>();
 
-        endpoints
-            .MapDelete("/envelopes/{id:guid}", async (Guid id, EnvelopeService svc, CancellationToken cancellationToken) =>
-            {
-                var result = await svc.DeleteAsync(id, cancellationToken); 
-                return result.Match(Results.NoContent);
-            });
+        group.MapDelete("/{id:guid}", DeleteEnvelopeAsync);
 
-        endpoints
-            .MapGet("/envelopes/{id:guid}", async (Guid id, EnvelopeService svc, CancellationToken cancellationToken) =>
-            {
-                var result = await svc.GetByIdAsync(id, cancellationToken);
-                return result.Match(Results.Ok);
-            });
+        group.MapGet("/{id:guid}", GetEnvelopeByIdAsync);
 
-        endpoints
-            .MapGet("/envelopes", async ([AsParameters] ListEnvelopesRequest query, EnvelopeService svc, CancellationToken cancellationToken) =>
-            {
-                var result = await svc.GetPagedAsync(query.Page, query.PageSize, cancellationToken);
-                return Results.Ok(result);
-            })
+        group.MapGet("/", GetEnvelopesPagedAsync)
             .AddEndpointFilter<ValidationFilter<ListEnvelopesRequest>>()
             .CacheOutput(BudgetingCachePolicy.EnvelopeListOutputPolicy);
 
-        endpoints
-            .MapPut("/envelopes/{id:guid}", async (Guid id, UpdateEnvelopeRequest req, EnvelopeService svc, CancellationToken cancellationToken) =>
-            {
-                var result = await svc.UpdateAsync(id, req, cancellationToken);
-                return result.Match(Results.Ok);
-            })
+        group.MapPut("/{id:guid}", UpdateEnvelopeAsync)
             .AddEndpointFilter<ValidationFilter<UpdateEnvelopeRequest>>();
 
-        endpoints
-            .MapGet("/envelopes/summary", async ([AsParameters] MonthlySummaryRequest req, EnvelopeService svc, CancellationToken cancellationToken) =>
-            {
-                var result = await svc.GetMonthlySummaryAsync(req.Year, req.Month, cancellationToken);
-                return Results.Ok(result);
-            })
+        group.MapGet("/summary", GetMonthlySummaryAsync)
             .AddEndpointFilter<ValidationFilter<MonthlySummaryRequest>>()
             .CacheOutput(BudgetingCachePolicy.ReportSummaryOutputPolicy);
 
-        endpoints
-            .MapHub<EnvelopeHub>("/hubs/envelopes");
+        endpoints.MapHub<EnvelopeHub>("/hubs/envelopes");
+    }
+
+    private static async Task<IResult> CreateEnvelopeAsync(
+        CreateEnvelopeRequest req,
+        EnvelopeService svc,
+        CancellationToken cancellationToken)
+    {
+        var result = await svc.CreateAsync(req, cancellationToken);
+        return result.Match(id => Results.Created($"/envelopes/{id}", new { id }));
+    }
+
+    private static async Task<IResult> DeleteEnvelopeAsync(
+        Guid id,
+        EnvelopeService svc,
+        CancellationToken cancellationToken)
+    {
+        var result = await svc.DeleteAsync(id, cancellationToken);
+        return result.Match(Results.NoContent);
+    }
+
+    private static async Task<IResult> GetEnvelopeByIdAsync(
+        Guid id,
+        EnvelopeService svc,
+        CancellationToken cancellationToken)
+    {
+        var result = await svc.GetByIdAsync(id, cancellationToken);
+        return result.Match(Results.Ok);
+    }
+
+    private static async Task<IResult> GetEnvelopesPagedAsync(
+        [AsParameters] ListEnvelopesRequest query,
+        EnvelopeService svc,
+        CancellationToken cancellationToken)
+    {
+        var result = await svc.GetPagedAsync(query.Page, query.PageSize, cancellationToken);
+        return Results.Ok(result);
+    }
+
+    private static async Task<IResult> UpdateEnvelopeAsync(
+        Guid id,
+        UpdateEnvelopeRequest req,
+        EnvelopeService svc,
+        CancellationToken cancellationToken)
+    {
+        var result = await svc.UpdateAsync(id, req, cancellationToken);
+        return result.Match(Results.Ok);
+    }
+
+    private static async Task<IResult> GetMonthlySummaryAsync(
+        [AsParameters] MonthlySummaryRequest req,
+        EnvelopeService svc,
+        CancellationToken cancellationToken)
+    {
+        var result = await svc.GetMonthlySummaryAsync(req.Year, req.Month, cancellationToken);
+        return Results.Ok(result);
     }
 }

@@ -12,23 +12,32 @@ public sealed class IdentityDemoEndpoints
 {
     public static void MapEndpoints(IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapGet("/identity/ping", () => "Identity pong!");
+        var group = endpoints.MapGroup("/identity");
 
-        endpoints.MapGet("/identity/me", (ClaimsPrincipal user) =>
-        {
-            var userId = user.FindFirstValue(IdentityClaimTypes.Sub);
-            var username = user.FindFirstValue(IdentityClaimTypes.Email);
-            var roles = user.FindAll(IdentityClaimTypes.Role).Select(c => c.Value);
+        group.MapGet("/ping", Ping);
 
-            return Results.Ok(new
-            {
-                UserId = userId,
-                UserName = username,
-                Roles = roles
-            });
+        group.MapGet("/me", GetCurrentUser)
+            .RequireAuthorization();
 
-        }).RequireAuthorization();
-
-        endpoints.MapGet("/identity/admin-only", () => Results.Ok("You are Admin!")).RequireAuthorization(p => p.RequireRole("Admin"));
+        group.MapGet("/admin-only", AdminOnly)
+            .RequireAuthorization(p => p.RequireRole("Admin"));
     }
+
+    private static string Ping() => "Identity pong!";
+
+    private static IResult GetCurrentUser(ClaimsPrincipal user)
+    {
+        var userId = user.FindFirstValue(IdentityClaimTypes.Sub);
+        var username = user.FindFirstValue(IdentityClaimTypes.Email);
+        var roles = user.FindAll(IdentityClaimTypes.Role).Select(c => c.Value);
+
+        return Results.Ok(new
+        {
+            UserId = userId,
+            UserName = username,
+            Roles = roles
+        });
+    }
+
+    private static IResult AdminOnly() => Results.Ok("You are Admin!");
 }
