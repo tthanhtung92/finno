@@ -21,6 +21,7 @@
     - [Chạy](#chạy)
   - [Cấu trúc dự án](#cấu-trúc-dự-án)
   - [Kiểm thử](#kiểm-thử)
+  - [Hiệu năng cache (benchmark)](#hiệu-năng-cache-benchmark)
   - [Quyết định kiến trúc](#quyết-định-kiến-trúc)
   - [Lộ trình](#lộ-trình)
   - [License](#license)
@@ -210,6 +211,31 @@ Kế hoạch ba tầng test:
 
 ---
 
+## Hiệu năng cache (benchmark)
+
+Đo bằng k6 trên `GET /envelopes`, so hai cảnh của cùng một endpoint: cache trượt (request đi hết xuống Postgres) và cache trúng (response bật ra ngay ở output cache). Cách dựng và cách ép miss/hit ghi trong `docs/guides/day-14/`.
+
+Throughput và độ trễ, 50 VUs trong 30 giây mỗi cảnh, `http_req_failed` bằng 0:
+
+| Chỉ số | Trước cache (miss) | Sau cache (hit) | Chênh |
+| --- | --- | --- | --- |
+| Throughput | 1238 req/s | 32722 req/s | ~26 lần |
+| Độ trễ p95 | 58.5 ms | 3.0 ms | ~19 lần thấp hơn |
+| Độ trễ p99 | 81.0 ms | 5.6 ms | ~14 lần thấp hơn |
+| Độ trễ trung bình | 40.2 ms | 1.4 ms | ~29 lần thấp hơn |
+
+Payload sau response compression, đo trên list `pageSize=100`:
+
+| Encoding | Kích thước | So với không nén |
+| --- | --- | --- |
+| Không nén | 16545 B | 1 lần |
+| Brotli (`br`) | 2517 B | nhỏ hơn 6.6 lần |
+| Gzip | 3313 B | nhỏ hơn 5.0 lần |
+
+Điều kiện đo: AMD Ryzen 7 4800H, Windows 11, host .NET 10 chạy `-c Release` trên localhost, k6 v2.1.0, 50 VUs, 30 giây mỗi cảnh, khoảng 60 envelope seed sẵn. Vì k6 và host nằm cùng máy, không qua mạng thật, các con số này chỉ để so tương đối miss với hit trên cùng cấu hình, không phải độ trễ người dùng thật gặp qua Internet.
+
+---
+
 ## Quyết định kiến trúc
 
 Các quyết định lớn được ghi lại dưới dạng ADR (Architecture Decision Record):
@@ -235,7 +261,7 @@ Lộ trình phát triển chi tiết 4 tuần xem trong [docs/ROADMAP.md](docs/R
   - [x] Nền móng, solution, bộ khung module
   - [x] Identity: auth, JWT, refresh token rotation
   - [x] Budgeting: CRUD Category / Envelope + báo cáo tháng (Space / Account kế hoạch)
-- [ ] **Tuần 2** (đang làm): HybridCache + tag invalidation và upload ảnh MinIO đã xong; còn serve ảnh qua cache, output caching, benchmark
+- [x] **Tuần 2**: HybridCache + tag invalidation, upload ảnh MinIO, serve ảnh qua cache, output caching, và benchmark trước/sau cache (số liệu ở mục Hiệu năng cache)
 - [ ] **Tuần 3**: Realtime & Messaging, SignalR số dư, Wolverine outbox, chống chi vượt envelope, import CSV idempotent
 - [ ] **Tuần 4**: DevOps & hoàn thiện, Docker, CI/CD, observability, docs
 
